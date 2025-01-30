@@ -156,6 +156,7 @@ class _HomePageState extends State<HomePage> {
       appBar: CustomizedAppbar(
         profileImageUrl: profileImageUrl,
         username: username,
+        resetValues: _resetValues,
       ),
       body: ConstrainedBox(
         constraints: BoxConstraints(

@@ -6,8 +6,9 @@ import '../Pages/history.dart';
 class CustomizedAppbar extends StatefulWidget implements PreferredSizeWidget {
   final String? profileImageUrl;
   final String? username;
+  VoidCallback resetValues;
 
-  const CustomizedAppbar({super.key, this.profileImageUrl, this.username});
+   CustomizedAppbar({super.key, this.profileImageUrl, this.username, required this.resetValues});
 
   @override
   State<CustomizedAppbar> createState() => _CustomizedAppbarState();
@@ -64,12 +65,21 @@ class _CustomizedAppbarState extends State<CustomizedAppbar> {
       ),
       actions: [
         if (widget.profileImageUrl != null)
-          IconButton(
-            onPressed: () async {
-              //_downloadImage(widget.profileImageUrl!);
-            },
-            icon: Icon(Icons.download, color: Colors.blue[800]),
-            tooltip: "Profilbild herunterladen",
+          Row(
+            children: [
+              IconButton(
+                onPressed: () async {
+                  //_downloadImage(widget.profileImageUrl!);
+                },
+                icon: const Icon(Icons.download, color: Colors.blue),
+                tooltip: "Profilbild herunterladen",
+              ),
+              IconButton(
+                onPressed: widget.resetValues,
+                icon: const Icon(Icons.cancel_outlined, color: Colors.blue),
+                tooltip: "Profil zurücksetzen",
+              ),
+            ],
           ),
       ],
     );
