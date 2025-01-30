@@ -1,0 +1,77 @@
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import '../Pages/history.dart';
+
+class CustomizedAppbar extends StatefulWidget implements PreferredSizeWidget {
+  final String? profileImageUrl;
+  final String? username;
+
+  const CustomizedAppbar({super.key, this.profileImageUrl, this.username});
+
+  @override
+  State<CustomizedAppbar> createState() => _CustomizedAppbarState();
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomizedAppbarState extends State<CustomizedAppbar> {
+  bool isDownloading = false;
+  String downloadProgress = "";
+
+  /*
+   _downloadImage(String imageUrl) async {
+    var response = await Dio().get(
+        imageUrl,
+        options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(response.data),
+        quality: 60,
+        name: "hello");
+    print(result);
+  }
+*/
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      centerTitle: true,
+      title: Text(
+        "Anastagram",
+        style: TextStyle(
+          color: Colors.blue[800],
+          fontWeight: FontWeight.bold,
+          fontSize: 22,
+        ),
+      ),
+      leading: IconButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder:
+                  (context) => SearchHistory(
+                    pPicture: widget.profileImageUrl,
+                    userName: widget.username,
+                  ),
+            ),
+          );
+        },
+        icon: Icon(Icons.history, color: Colors.blue[800]),
+        tooltip: "Suchverlauf anzeigen",
+      ),
+      actions: [
+        if (widget.profileImageUrl != null)
+          IconButton(
+            onPressed: () async {
+              //_downloadImage(widget.profileImageUrl!);
+            },
+            icon: Icon(Icons.download, color: Colors.blue[800]),
+            tooltip: "Profilbild herunterladen",
+          ),
+      ],
+    );
+  }
+}

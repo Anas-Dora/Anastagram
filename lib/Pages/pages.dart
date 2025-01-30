@@ -1,0 +1,73 @@
+// ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class Pages extends StatefulWidget {
+  final profileName;
+  final void Function()? deleteProfile;
+
+  const Pages({super.key, this.profileName, this.deleteProfile});
+
+  @override
+  State<Pages> createState() => _PagesState();
+}
+
+class _PagesState extends State<Pages> {
+  final snackBar = SnackBar(
+    backgroundColor: Colors.blue[800],
+    duration: const Duration(milliseconds: 900),
+    content: const Text(
+      'Kopiert',
+      style: TextStyle(fontWeight: FontWeight.bold),
+      textAlign: TextAlign.center,
+    ),
+    behavior: SnackBarBehavior.floating,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () {
+              final data = ClipboardData(text: widget.profileName);
+              Clipboard.setData(data);
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            },
+            onLongPress: () {
+              setState(() {
+                widget.deleteProfile!();
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
+                border: Border.all(color: Color(0xFF1565C0), width: 1.5),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 15),
+                      (widget.profileName == null)
+                          ? const Text("")
+                          : Text(
+                            "${widget.profileName}",
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
