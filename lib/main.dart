@@ -17,6 +17,13 @@ class MyApp extends StatelessWidget {
       create: (context) => UserData(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          textSelectionTheme: TextSelectionThemeData(
+            selectionColor: Colors.blue[100],
+            cursorColor: Colors.blue[800],
+            selectionHandleColor: Colors.blue[800],
+          ),
+        ),
         home: HomePage(),
       ),
     );
