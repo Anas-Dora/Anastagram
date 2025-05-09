@@ -15,11 +15,11 @@ class Pages extends StatefulWidget {
 
 class _PagesState extends State<Pages> {
   final snackBar = SnackBar(
-    backgroundColor: Colors.blue[800],
+    backgroundColor: Color(0xffe1e2e8),
     duration: const Duration(milliseconds: 900),
     content: const Text(
       'Kopiert',
-      style: TextStyle(fontWeight: FontWeight.bold),
+      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff0b0e13)),
       textAlign: TextAlign.center,
     ),
     behavior: SnackBarBehavior.floating,
@@ -46,22 +46,21 @@ class _PagesState extends State<Pages> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(15)),
-                border: Border.all(color: Color(0xFF1565C0), width: 1.5),
+                color: Color(0xFFa0cafd),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      const SizedBox(width: 15),
-                      (widget.profileName == null)
-                          ? const Text("")
-                          : Text(
-                            "${widget.profileName}",
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                    ],
-                  ),
+                  const SizedBox(width: 15),
+                  (widget.profileName == null)
+                      ? const Text("")
+                      : Text(
+                        "${widget.profileName}",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Color(0xff194975),
+                        ),
+                      ),
                 ],
               ),
             ),

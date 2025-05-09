@@ -1,5 +1,5 @@
-import 'dart:typed_data';
-import 'package:dio/dio.dart';
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import '../Pages/history.dart';
 
@@ -8,7 +8,12 @@ class CustomizedAppbar extends StatefulWidget implements PreferredSizeWidget {
   final String? username;
   VoidCallback resetValues;
 
-   CustomizedAppbar({super.key, this.profileImageUrl, this.username, required this.resetValues});
+  CustomizedAppbar({
+    super.key,
+    this.profileImageUrl,
+    this.username,
+    required this.resetValues,
+  });
 
   @override
   State<CustomizedAppbar> createState() => _CustomizedAppbarState();
@@ -36,14 +41,14 @@ class _CustomizedAppbarState extends State<CustomizedAppbar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xff272a2f),
       elevation: 0,
       shadowColor: Colors.transparent,
       centerTitle: true,
       title: Text(
         "Anastagram",
         style: TextStyle(
-          color: Colors.blue[800],
+          color: Color(0xFFe1e2e8),
           fontWeight: FontWeight.bold,
           fontSize: 22,
         ),
@@ -60,7 +65,7 @@ class _CustomizedAppbarState extends State<CustomizedAppbar> {
             ),
           );
         },
-        icon: Icon(Icons.history, color: Colors.blue[800]),
+        icon: Icon(Icons.history, color: Color(0xFFe1e2e8)),
         tooltip: "Suchverlauf anzeigen",
       ),
       actions: [
@@ -71,12 +76,15 @@ class _CustomizedAppbarState extends State<CustomizedAppbar> {
                 onPressed: () async {
                   //_downloadImage(widget.profileImageUrl!);
                 },
-                icon: const Icon(Icons.download, color: Colors.blue),
+                icon: const Icon(Icons.download, color: Color(0xFFe1e2e8)),
                 tooltip: "Profilbild herunterladen",
               ),
               IconButton(
                 onPressed: widget.resetValues,
-                icon: const Icon(Icons.cancel_outlined, color: Colors.blue),
+                icon: const Icon(
+                  Icons.cancel_outlined,
+                  color: Color(0xFFe1e2e8),
+                ),
                 tooltip: "Profil zurücksetzen",
               ),
             ],

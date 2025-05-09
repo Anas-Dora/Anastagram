@@ -1,4 +1,4 @@
-import 'package:anastagram/Models/NetworkVideoPlayer.dart';
+import 'package:anastagram/Widget/NetworkVideoPlayer.dart';
 import 'package:flutter/material.dart';
 
 class StoryVideos extends StatefulWidget {

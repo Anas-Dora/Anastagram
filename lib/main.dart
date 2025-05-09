@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+          useMaterial3: true,
           textSelectionTheme: TextSelectionThemeData(
             selectionColor: Colors.blue[100],
             cursorColor: Colors.blue[800],

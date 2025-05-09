@@ -8,13 +8,13 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../Models/InstagramApi.dart';
-import '../Models/profileimage.dart';
+import '../Widget/profileimage.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/user_data.dart';
-import '../Models/NetworkVideoPlayer.dart';
+import '../Widget/NetworkVideoPlayer.dart';
 import '../Widget/CustomAppbar.dart';
 import '../Widget/Dialog.dart';
 import 'Images.dart';
@@ -72,10 +72,10 @@ class _HomePageState extends State<HomePage> {
 
   void savePages() {
     List items =
-    Provider.of<UserData>(
-      context,
-      listen: false,
-    ).profiles.map((e) => e.toJson()).toList();
+        Provider.of<UserData>(
+          context,
+          listen: false,
+        ).profiles.map((e) => e.toJson()).toList();
     prefs.setString('pages', jsonEncode(items));
   }
 
@@ -111,6 +111,7 @@ class _HomePageState extends State<HomePage> {
 
   void _resetValues() {
     setState(() {
+      usernameController.clear();
       profileImageUrl = null;
       followers = 0;
       following = 0;
@@ -152,7 +153,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xff191C20),
       appBar: CustomizedAppbar(
         profileImageUrl: profileImageUrl,
         username: username,
@@ -172,18 +173,18 @@ class _HomePageState extends State<HomePage> {
                   height: 300,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Color(0xFF1565C0), width: 5),
+                    border: Border.all(color: Color(0xFF194975), width: 5),
                   ),
                   child: ClipOval(
                     child:
-                    profileImageUrl == null
-                        ? Image.asset(
-                      "images/test.jpg",
-                      fit: BoxFit.cover,
-                      width: 300,
-                      height: 300,
-                    )
-                        : ProfileImage(profileImage: profileImageUrl!),
+                        profileImageUrl == null
+                            ? Image.asset(
+                              "images/test.jpg",
+                              fit: BoxFit.cover,
+                              width: 300,
+                              height: 300,
+                            )
+                            : ProfileImage(profileImage: profileImageUrl!),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -192,12 +193,12 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
+                    color: Color(0xffa0cafd),
                   ),
                 ),
                 SizedBox(height: 10),
                 if (isReloading)
-                  CircularProgressIndicator(color: Colors.blue[800])
+                  CircularProgressIndicator(color: Color(0xFFa0cafd))
                 else
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -214,27 +215,24 @@ class _HomePageState extends State<HomePage> {
                   onPressed: _toggleSaveProfile,
                   icon: Icon(
                     isSaved ? Icons.bookmark : Icons.bookmark_border,
-                    color: isSaved ? Colors.white : Colors.blue[800],
+                    color: Color(0xff003258),
                   ),
                   label: Text(
                     isSaved ? "gespeichert" : "Speichern",
-                    style: TextStyle(
-                      color: isSaved ? Colors.white : Colors.blue[800],
-                    ),
+                    style: TextStyle(color: Color(0xff003258)),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isSaved ? Colors.blue[800] : Colors.white,
-                    side: isSaved ? null : BorderSide(color: Color(0xFF1565C0)),
+                    backgroundColor: Color(0xffa0cafd),
                   ),
                 ),
                 SizedBox(height: 15),
-                Divider(color: Colors.blue[800], thickness: 2),
+                Divider(color: Color(0xff2E3135), thickness: 2),
                 SizedBox(height: 20),
                 if (isPrivate)
                   Text(
                     'IST PRIVAT',
                     style: TextStyle(
-                      color: Colors.blue[800],
+                      color: Color(0xff93000a),
                       fontSize: 35,
                       fontWeight: FontWeight.bold,
                     ),
@@ -260,8 +258,8 @@ class _HomePageState extends State<HomePage> {
             },
           );
         },
-        backgroundColor: Colors.blue[800],
-        child: Icon(Icons.search, color: Colors.white),
+        backgroundColor: Color(0xff194975),
+        child: Icon(Icons.search, color: Color(0xffD1E4FF)),
       ),
     );
   }
@@ -274,10 +272,10 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.blue[800],
+            color: Color(0xffa0cafd),
           ),
         ),
-        Text(label, style: TextStyle(fontSize: 16, color: Colors.blue[800])),
+        Text(label, style: TextStyle(fontSize: 16, color: Color(0xffa0cafd))),
       ],
     );
   }
@@ -292,7 +290,7 @@ class _HomePageState extends State<HomePage> {
         final time = item["time"];
 
         String formattedTime =
-        time != null ? _formatDateTime(time) : 'Keine Zeit';
+            time != null ? _formatDateTime(time) : 'Keine Zeit';
 
         return Padding(
           padding: const EdgeInsets.all(8.0),
@@ -328,7 +326,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     'Zeit: $formattedTime',
-                    style: TextStyle(fontSize: 14, color: Colors.blue[800]),
+                    style: TextStyle(fontSize: 14, color: Color(0xffa0cafd)),
                   ),
                 ),
               SizedBox(height: 10),

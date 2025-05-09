@@ -1,5 +1,5 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first, use_key_in_widget_constructors
-import 'package:anastagram/Models/pp.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first, use_key_in_widget_constructors, must_be_immutable
+import 'package:anastagram/Widget/pp.dart';
 import 'package:flutter/material.dart';
 
 class ProfileImage extends StatelessWidget {

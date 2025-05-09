@@ -14,7 +14,11 @@ class SearchHistory extends StatefulWidget {
   final userName;
   final pPicture;
 
-  const SearchHistory({super.key, required this.userName, required this.pPicture});
+  const SearchHistory({
+    super.key,
+    required this.userName,
+    required this.pPicture,
+  });
 
   @override
   State<SearchHistory> createState() => _SearchHistoryState();
@@ -33,12 +37,11 @@ class _SearchHistoryState extends State<SearchHistory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xff191C20),
       appBar: AppBar(
         leading: Tooltip(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(4)),
-            color: Colors.black54,
           ),
           message: "Zurück",
           textStyle: TextStyle(color: Colors.white),
@@ -46,15 +49,15 @@ class _SearchHistoryState extends State<SearchHistory> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back, color: Colors.blue[800]),
+            icon: Icon(Icons.arrow_back, color: Color(0xFFe1e2e8)),
           ),
         ),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xff272a2f),
         title: Text(
           "Anastagram",
           style: TextStyle(
-            color: Colors.blue[800],
+            color: Color(0xFFe1e2e8),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -69,13 +72,13 @@ class _SearchHistoryState extends State<SearchHistory> {
                     Icon(
                       Icons.bookmarks_outlined,
                       size: 100,
-                      color: Colors.blue[800],
+                      color: Color(0xFFa0cafd),
                     ),
                     SizedBox(height: 10),
                     Text(
                       "Keine gespeicherte \nprofilen",
                       style: TextStyle(
-                        color: Colors.blue[800],
+                        color: Color(0xFFa0cafd),
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                       ),
@@ -100,7 +103,7 @@ class _SearchHistoryState extends State<SearchHistory> {
                                     userData.profiles[index],
                                   );
                                 });
-                             /*   deletePage(
+                                /*   deletePage(
                                   context,
                                   userData.profiles[index].name!,
                                 );*/

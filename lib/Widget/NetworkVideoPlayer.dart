@@ -46,15 +46,15 @@ class _NetworkVideoPlayerState extends State<NetworkVideoPlayer> {
                         : _controller.play();
                   });
                 },
-                backgroundColor: Colors.blue[100],
+                backgroundColor: Color(0xffa0cafd),
                 child: Icon(
                   _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.blue[800],
+                  color: Color(0xff194975),
                 ),
               ),
             ],
           ),
         )
-        : Center(child: CircularProgressIndicator(color: Colors.blue[800]));
+        : Center(child: CircularProgressIndicator(color: Color(0xffa0cafd)));
   }
 }
