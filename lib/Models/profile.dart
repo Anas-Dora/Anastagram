@@ -1,15 +1,11 @@
+import 'package:hive/hive.dart';
+
+part 'profile.g.dart';
+
+@HiveType(typeId: 0)
 class Profile {
+  @HiveField(0)
   String? name;
 
-  Profile({this.name}) {
-    name = name;
-  }
-
-  toJson() {
-    return {"name": name};
-  }
-
-  fromJson(jsonData) {
-    return Profile(name: jsonData['name']);
-  }
+  Profile({this.name});
 }

@@ -1,19 +1,16 @@
 // ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:anastagram/Widget/DottedLinePainter.dart';
+import 'package:hive/hive.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../Models/InstagramApi.dart';
 import '../Widget/profileimage.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
-
-import '../Models/user_data.dart';
+import '../Models/userdata.dart';
 import '../Widget/NetworkVideoPlayer.dart';
 import '../Widget/CustomAppbar.dart';
 import '../Widget/Dialog.dart';
@@ -40,7 +37,6 @@ class _HomePageState extends State<HomePage> {
   bool isReloading = false;
   bool isPrivate = false;
   bool isSaved = false;
-  late SharedPreferences prefs;
   List<Map<String, String>> mediaItems = [];
 
   @override
@@ -48,6 +44,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     usernameController.addListener(() => setState(() {}));
     setupPages();
+    Hive.openBox<UserData>('userData');
   }
 
   @override
@@ -56,36 +53,11 @@ class _HomePageState extends State<HomePage> {
     usernameController.dispose();
   }
 
-  setupPages() async {
-    prefs = await SharedPreferences.getInstance();
-    String? stringPages = prefs.getString('pages');
-    List pagesList = jsonDecode(stringPages!);
-    for (var userPage in pagesList) {
-      setState(() {
-        Provider.of<UserData>(
-          context,
-          listen: false,
-        ).profiles.add(Profile().fromJson(userPage));
-      });
-    }
-  }
+  setupPages() async {}
 
-  void savePages() {
-    List items =
-        Provider.of<UserData>(
-          context,
-          listen: false,
-        ).profiles.map((e) => e.toJson()).toList();
-    prefs.setString('pages', jsonEncode(items));
-  }
+  void savePages() {}
 
-  void deletePage(String profileName) {
-    List<Profile> profiles =
-        Provider.of<UserData>(context, listen: false).profiles;
-    profiles.removeWhere((profile) => profile.name == profileName);
-    List items = profiles.map((e) => e.toJson()).toList();
-    prefs.setString('pages', jsonEncode(items));
-  }
+  void deletePage(String profileName) {}
 
   Future<void> _fetchUserDetails(String username) async {
     setState(() => isReloading = true);
@@ -123,31 +95,27 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _toggleSaveProfile() async {
-    setState(() => isSaved = !isSaved);
-    if (profileImageUrl != null) {
-      setState(() {
-        if (isSaved) {
-          Provider.of<UserData>(
-            context,
-            listen: false,
-          ).profiles.add(Profile(name: username));
-          savePages();
-        } else {
-          Provider.of<UserData>(
-            context,
-            listen: false,
-          ).profiles.removeWhere((profile) => profile.name == username);
-          deletePage(username);
-        }
-      });
-    }
-  }
-
   String _formatDateTime(String dateTimeString) {
     DateTime dateTime = DateTime.parse(dateTimeString);
     String formattedDate = DateFormat('HH:mm').format(dateTime);
     return '$formattedDate | ${timeago.format(dateTime)}';
+  }
+
+  void _toggleSaveProfile() async {
+    final box = Hive.box<UserData>('userData');
+    UserData? userData = box.get('mainUser') ?? UserData();
+
+    String newName = usernameController.text.trim();
+    bool nameExists = userData.profiles.any((p) => p.name == newName);
+
+    if (!nameExists && newName.isNotEmpty) {
+      userData.profiles.add(Profile(name: newName));
+      await box.put('mainUser', userData);
+    }
+
+    setState(() {
+      isSaved = true;
+    });
   }
 
   @override

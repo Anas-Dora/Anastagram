@@ -1,14 +1,9 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables, unnecessary_brace_in_string_interps, non_constant_identifier_names, constant_identifier_names, list_remove_unrelated_type
+import 'package:anastagram/Models/userdata.dart';
+import 'package:hive/hive.dart';
 
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../Models/user_data.dart';
-import '../Models/profile.dart';
 import 'pages.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class SearchHistory extends StatefulWidget {
   final userName;
@@ -24,13 +19,17 @@ class SearchHistory extends StatefulWidget {
   State<SearchHistory> createState() => _SearchHistoryState();
 }
 
-void deletePage(context, String profileName) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  List<Profile> profiles =
-      Provider.of<UserData>(context, listen: false).profiles;
-  profiles.removeWhere((profile) => profile.name == profileName);
-  List items = profiles.map((e) => e.toJson()).toList();
-  prefs.setString('pages', jsonEncode(items));
+void deletePage(context, String profileName) async {}
+late Box<UserData> box;
+late UserData userData;
+bool empety = false;
+@override
+void initState() {
+  box = Hive.box<UserData>('userData');
+  userData = box.get('mainUser') ?? UserData(profiles: []);
+
+  // Optional: Flag aktualisieren
+  empety = userData.profiles.isEmpty;
 }
 
 class _SearchHistoryState extends State<SearchHistory> {
@@ -64,7 +63,7 @@ class _SearchHistoryState extends State<SearchHistory> {
         centerTitle: true,
       ),
       body:
-          (Provider.of<UserData>(context).profiles.isEmpty)
+          empety
               ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -90,25 +89,18 @@ class _SearchHistoryState extends State<SearchHistory> {
               : Column(
                 children: [
                   Expanded(
-                    child: Consumer<UserData>(
-                      builder: (BuildContext context, userData, Widget? child) {
-                        return ListView.builder(
-                          itemCount: userData.profiles.length,
-                          itemBuilder: (context, index) {
-                            return Pages(
-                              profileName: userData.profiles[index].name,
-                              deleteProfile: () async {
-                                setState(() {
-                                  userData.deleteProfile(
-                                    userData.profiles[index],
-                                  );
-                                });
-                                /*   deletePage(
-                                  context,
-                                  userData.profiles[index].name!,
-                                );*/
-                              },
-                            );
+                    child: ListView.builder(
+                      itemCount: userData.profiles.length,
+                      itemBuilder: (context, index) {
+                        return Pages(
+                          profileName:
+                              userData.profiles[index].name ?? "Unbenannt",
+                          deleteProfile: () async {
+                            userData.profiles.removeAt(index);
+                            await box.put('mainUser', userData);
+                            setState(() {
+                              empety = userData.profiles.isEmpty;
+                            });
                           },
                         );
                       },
