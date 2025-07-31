@@ -57,11 +57,7 @@ class _CustomizedAppbarState extends State<CustomizedAppbar> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder:
-                  (context) => SearchHistory(
-                    pPicture: widget.profileImageUrl,
-                    userName: widget.username,
-                  ),
+              builder: (context) => SearchHistory(userName: widget.username),
             ),
           );
         },

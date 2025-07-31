@@ -1,34 +1,28 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables, unnecessary_brace_in_string_interps, non_constant_identifier_names, constant_identifier_names, list_remove_unrelated_type
-import 'package:anastagram/Models/userdata.dart';
+import 'package:anastagram/data/userdata.dart';
 import 'package:hive/hive.dart';
 
 import 'pages.dart';
 import 'package:flutter/material.dart';
 
 class SearchHistory extends StatefulWidget {
-  final userName;
-  final pPicture;
+  final String? userName;
 
-  const SearchHistory({
-    super.key,
-    required this.userName,
-    required this.pPicture,
-  });
+  const SearchHistory({super.key, required this.userName});
 
   @override
   State<SearchHistory> createState() => _SearchHistoryState();
 }
 
 void deletePage(context, String profileName) async {}
-late Box<UserData> box;
-late UserData userData;
+Box<UserData> box = Hive.box<UserData>('userData');
+UserData userData = box.get('mainUser') ?? UserData(profiles: []);
 bool empety = false;
+
 @override
 void initState() {
-  box = Hive.box<UserData>('userData');
-  userData = box.get('mainUser') ?? UserData(profiles: []);
-
-  // Optional: Flag aktualisieren
+  box;
+  userData;
   empety = userData.profiles.isEmpty;
 }
 

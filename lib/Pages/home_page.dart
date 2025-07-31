@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, use_build_context_synchronously
 
 import 'dart:async';
 
@@ -7,16 +7,16 @@ import 'package:hive/hive.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../Models/InstagramApi.dart';
+import '../data/InstagramApi.dart';
 import '../Widget/profileimage.dart';
 
-import '../Models/userdata.dart';
+import '../data/userdata.dart';
 import '../Widget/NetworkVideoPlayer.dart';
 import '../Widget/CustomAppbar.dart';
 import '../Widget/Dialog.dart';
 import 'Images.dart';
 import 'Videos.dart';
-import '../Models/profile.dart';
+import '../data/profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -37,13 +37,13 @@ class _HomePageState extends State<HomePage> {
   bool isReloading = false;
   bool isPrivate = false;
   bool isSaved = false;
+  String saveText = "Speichern";
   List<Map<String, String>> mediaItems = [];
 
   @override
   void initState() {
     super.initState();
     usernameController.addListener(() => setState(() {}));
-    setupPages();
     Hive.openBox<UserData>('userData');
   }
 
@@ -53,11 +53,81 @@ class _HomePageState extends State<HomePage> {
     usernameController.dispose();
   }
 
-  setupPages() async {}
+  void saveProfile() {
+    final box = Hive.box<UserData>('userData');
+    UserData? userData = box.get('mainUser') ?? UserData();
 
-  void savePages() {}
+    String newName = usernameController.text.trim();
+    bool nameExists = userData.profiles.any((p) => p.name == newName);
+    saveText = "gespeichert";
 
-  void deletePage(String profileName) {}
+    if (newName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profilname darf nicht leer sein.')),
+      );
+      setState(() {
+        isSaved = false;
+      });
+      return;
+    }
+
+    if (nameExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ein Profil mit diesem Namen existiert bereits.'),
+        ),
+      );
+      setState(() {
+        isSaved = false;
+      });
+      return;
+    }
+    try {
+      userData.profiles.add(Profile(name: newName));
+      box.put('mainUser', userData);
+      setState(() {
+        isSaved = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profil "$newName" erfolgreich gespeichert!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fehler beim Speichern des Profils: $e')),
+      );
+      setState(() {
+        isSaved = false;
+      });
+    }
+  }
+
+  void unSaveProfile() {
+    final box = Hive.box<UserData>('userData');
+    UserData? userData = box.get('mainUser') ?? UserData();
+
+    String newName = usernameController.text.trim();
+    bool nameExists = userData.profiles.any((p) => p.name == newName);
+    saveText = "Speichern";
+
+    if (!nameExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profil nicht gespeichert.')),
+      );
+      setState(() {
+        isSaved = false;
+      });
+      return;
+    }
+
+    userData.profiles.removeWhere((p) => p.name == newName);
+    box.put('mainUser', userData);
+    setState(() {
+      isSaved = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Profil "$newName" erfolgreich entfernt!')),
+    );
+  }
 
   Future<void> _fetchUserDetails(String username) async {
     setState(() => isReloading = true);
@@ -70,14 +140,28 @@ class _HomePageState extends State<HomePage> {
       mediaItems = instagramApi.mediaItems;
       isPrivate = instagramApi.isPrivate ?? false;
       isReloading = false;
+      saveText = "Speichern";
     });
   }
 
   void submit() {
+    final box = Hive.box<UserData>('userData');
+    UserData? userData = box.get('mainUser') ?? UserData();
     _fetchUserDetails(username);
     Navigator.of(context).pop(usernameController.text);
-    if (profileImageUrl != null) {
-      isSaved = false;
+
+    bool nameExists = userData.profiles.any((p) => p.name == username);
+
+    if (nameExists) {
+      saveText = "gespeichert";
+      setState(() {
+        isSaved = true;
+      });
+    } else {
+      saveText = "Speichern";
+      setState(() {
+        isSaved = false;
+      });
     }
   }
 
@@ -99,23 +183,6 @@ class _HomePageState extends State<HomePage> {
     DateTime dateTime = DateTime.parse(dateTimeString);
     String formattedDate = DateFormat('HH:mm').format(dateTime);
     return '$formattedDate | ${timeago.format(dateTime)}';
-  }
-
-  void _toggleSaveProfile() async {
-    final box = Hive.box<UserData>('userData');
-    UserData? userData = box.get('mainUser') ?? UserData();
-
-    String newName = usernameController.text.trim();
-    bool nameExists = userData.profiles.any((p) => p.name == newName);
-
-    if (!nameExists && newName.isNotEmpty) {
-      userData.profiles.add(Profile(name: newName));
-      await box.put('mainUser', userData);
-    }
-
-    setState(() {
-      isSaved = true;
-    });
   }
 
   @override
@@ -180,13 +247,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                 const SizedBox(height: 20),
                 ElevatedButton.icon(
-                  onPressed: _toggleSaveProfile,
+                  onPressed: isSaved ? unSaveProfile : saveProfile,
                   icon: Icon(
                     isSaved ? Icons.bookmark : Icons.bookmark_border,
                     color: Color(0xff003258),
                   ),
                   label: Text(
-                    isSaved ? "gespeichert" : "Speichern",
+                    saveText,
                     style: TextStyle(color: Color(0xff003258)),
                   ),
                   style: ElevatedButton.styleFrom(

@@ -1,5 +1,5 @@
-import 'package:anastagram/Models/profile.dart';
-import 'package:anastagram/Models/userdata.dart';
+import 'package:anastagram/data/profile.dart';
+import 'package:anastagram/data/userdata.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 

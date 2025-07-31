@@ -27,12 +27,16 @@ class InstagramApi {
       final storyResponse = await http.get(storyUrl, headers: headers);
 
       if (infoResponse.statusCode == 200) {
-        final Map<String, dynamic> jsonResponseInfo = json.decode(infoResponse.body);
+        final Map<String, dynamic> jsonResponseInfo = json.decode(
+          infoResponse.body,
+        );
         _parseInfoData(jsonResponseInfo);
       }
 
       if (storyResponse.statusCode == 200) {
-        final Map<String, dynamic> jsonResponseStory = json.decode(storyResponse.body);
+        final Map<String, dynamic> jsonResponseStory = json.decode(
+          storyResponse.body,
+        );
         _parseStoryData(jsonResponseStory);
       }
     } catch (e) {
@@ -47,10 +51,6 @@ class InstagramApi {
       _followers = info['follower_count'];
       _isPrivate = info['is_private'];
       _following = info['following_count'];
-      print("Profile Pic URL: $_picURL");
-      print("Followers: $_followers");
-      print("Is Private: $_isPrivate");
-      print("Following: $_following");
     }
   }
 
@@ -73,7 +73,11 @@ class InstagramApi {
 
   void _addMediaItem(String? url, String type, String? time) {
     if (url != null && url.isNotEmpty) {
-      final mediaItem = {'type': type, 'url': url, if (time != null) 'time': time};
+      final mediaItem = {
+        'type': type,
+        'url': url,
+        if (time != null) 'time': time,
+      };
       if (!_mediaItems.any((item) => item['url'] == url)) {
         _mediaItems.add(mediaItem);
         print("$type added: $url at time: ${time ?? 'No time'}");
