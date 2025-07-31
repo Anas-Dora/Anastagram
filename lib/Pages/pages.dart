@@ -19,7 +19,7 @@ class _PagesState extends State<Pages> {
     duration: const Duration(milliseconds: 900),
     content: const Text(
       'Kopiert',
-      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff0b0e13)),
+      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff2e3135)),
       textAlign: TextAlign.center,
     ),
     behavior: SnackBarBehavior.floating,

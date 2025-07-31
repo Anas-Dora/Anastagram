@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, use_build_context_synchronously
 
-import 'dart:async';
-
 import 'package:anastagram/Widget/DottedLinePainter.dart';
 import 'package:hive/hive.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -63,7 +61,16 @@ class _HomePageState extends State<HomePage> {
 
     if (newName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profilname darf nicht leer sein.')),
+        SnackBar(
+          content: const Text(
+            'Profilname darf nicht leer sein.',
+            style: TextStyle(color: Color(0xff2e3135)),
+          ),
+          backgroundColor: Color(0xffe1e2e8),
+          behavior: SnackBarBehavior.floating,
+
+          duration: Duration(seconds: 2),
+        ),
       );
       setState(() {
         isSaved = false;
@@ -73,8 +80,15 @@ class _HomePageState extends State<HomePage> {
 
     if (nameExists) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ein Profil mit diesem Namen existiert bereits.'),
+        SnackBar(
+          content: Text(
+            'Ein Profil mit diesem Namen existiert bereits.',
+            style: TextStyle(color: Color(0xff2e3135)),
+          ),
+          backgroundColor: Color(0xffe1e2e8),
+          behavior: SnackBarBehavior.floating,
+
+          duration: Duration(seconds: 2),
         ),
       );
       setState(() {
@@ -89,11 +103,29 @@ class _HomePageState extends State<HomePage> {
         isSaved = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profil "$newName" erfolgreich gespeichert!')),
+        SnackBar(
+          content: Text(
+            'Profil "$newName" erfolgreich gespeichert!',
+            style: TextStyle(color: Color(0xff2e3135)),
+          ),
+          backgroundColor: Color(0xffe1e2e8),
+          behavior: SnackBarBehavior.floating,
+
+          duration: Duration(seconds: 2),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fehler beim Speichern des Profils: $e')),
+        SnackBar(
+          content: Text(
+            'Fehler beim Speichern des Profils: $e',
+            style: TextStyle(color: Color(0xff2e3135)),
+          ),
+          backgroundColor: Color(0xffe1e2e8),
+          behavior: SnackBarBehavior.floating,
+
+          duration: Duration(seconds: 2),
+        ),
       );
       setState(() {
         isSaved = false;
@@ -109,9 +141,37 @@ class _HomePageState extends State<HomePage> {
     bool nameExists = userData.profiles.any((p) => p.name == newName);
     saveText = "Speichern";
 
+    if (newName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Profilname darf nicht leer sein.',
+            style: TextStyle(color: Color(0xff2e3135)),
+          ),
+          backgroundColor: Color(0xffe1e2e8),
+          behavior: SnackBarBehavior.floating,
+
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        isSaved = false;
+      });
+      return;
+    }
+
     if (!nameExists) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil nicht gespeichert.')),
+        SnackBar(
+          content: Text(
+            'Profil nicht gespeichert.',
+            style: TextStyle(color: Color(0xff2e3135)),
+          ),
+          backgroundColor: Color(0xffe1e2e8),
+          behavior: SnackBarBehavior.floating,
+
+          duration: Duration(seconds: 2),
+        ),
       );
       setState(() {
         isSaved = false;
@@ -125,7 +185,16 @@ class _HomePageState extends State<HomePage> {
       isSaved = false;
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Profil "$newName" erfolgreich entfernt!')),
+      SnackBar(
+        content: Text(
+          'Profil "$newName" erfolgreich entfernt!',
+          style: TextStyle(color: Color(0xff2e3135)),
+        ),
+        backgroundColor: Color(0xffe1e2e8),
+        behavior: SnackBarBehavior.floating,
+
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
@@ -176,6 +245,7 @@ class _HomePageState extends State<HomePage> {
       mediaItems.clear();
       isPrivate = false;
       isSaved = false;
+      saveText = "Speichern";
     });
   }
 
