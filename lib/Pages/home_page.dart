@@ -209,7 +209,6 @@ class _HomePageState extends State<HomePage> {
       mediaItems = instagramApi.mediaItems;
       isPrivate = instagramApi.isPrivate ?? false;
       isReloading = false;
-      saveText = "Speichern";
     });
   }
 
