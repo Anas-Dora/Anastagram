@@ -3,17 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class Pages extends StatefulWidget {
+class ProfileNameTile extends StatefulWidget {
   final profileName;
   final void Function()? deleteProfile;
 
-  const Pages({super.key, this.profileName, this.deleteProfile});
+  const ProfileNameTile({super.key, this.profileName, this.deleteProfile});
 
   @override
-  State<Pages> createState() => _PagesState();
+  State<ProfileNameTile> createState() => _ProfileNameTileState();
 }
 
-class _PagesState extends State<Pages> {
+class _ProfileNameTileState extends State<ProfileNameTile> {
   final snackBar = SnackBar(
     backgroundColor: Color(0xffe1e2e8),
     duration: const Duration(milliseconds: 900),

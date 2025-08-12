@@ -1,17 +1,17 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables, unnecessary_brace_in_string_interps, non_constant_identifier_names, constant_identifier_names, list_remove_unrelated_type
+import 'package:anastagram/Widgets/profile_name_tile.dart';
 import 'package:anastagram/data/userdata.dart';
 import 'package:hive/hive.dart';
 
-import 'pages.dart';
 import 'package:flutter/material.dart';
 
-class SearchHistory extends StatefulWidget {
+class HistoryPage extends StatefulWidget {
   final String? userName;
 
-  const SearchHistory({super.key, required this.userName});
+  const HistoryPage({super.key, required this.userName});
 
   @override
-  State<SearchHistory> createState() => _SearchHistoryState();
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
 void deletePage(context, String profileName) async {}
@@ -26,7 +26,7 @@ void initState() {
   empety = userData.profiles.isEmpty;
 }
 
-class _SearchHistoryState extends State<SearchHistory> {
+class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +86,7 @@ class _SearchHistoryState extends State<SearchHistory> {
                     child: ListView.builder(
                       itemCount: userData.profiles.length,
                       itemBuilder: (context, index) {
-                        return Pages(
+                        return ProfileNameTile(
                           profileName:
                               userData.profiles[index].name ?? "Unbenannt",
                           deleteProfile: () async {

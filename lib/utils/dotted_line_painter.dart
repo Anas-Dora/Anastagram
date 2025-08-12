@@ -5,25 +5,21 @@ class DottedLinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Paint paint =
         Paint()
-          ..color = Color(0xffa0cafd) // Farbe der Linie
-          ..strokeWidth =
-              3 // Dicke der Linie
+          ..color = Color(0xffa0cafd)
+          ..strokeWidth = 3
           ..style = PaintingStyle.stroke;
 
-    double dashWidth = 10.0; // Länge jedes Strichs
-    double dashSpace = 5.0; // Abstand zwischen den Strichen
+    double dashWidth = 10.0;
+    double dashSpace = 5.0;
     double startX = 0;
 
-    // Erstelle eine Linie mit Strichen
     while (startX < size.width) {
       canvas.drawLine(
         Offset(startX, size.height / 2),
         Offset(startX + dashWidth, size.height / 2),
         paint,
       );
-      startX +=
-          dashWidth +
-          dashSpace; // Berechne die Position für den nächsten Strich
+      startX += dashWidth + dashSpace;
     }
   }
 

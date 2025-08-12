@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class StoryImages extends StatefulWidget {
+class StoryImage extends StatefulWidget {
   final String image;
 
-  const StoryImages({super.key, required this.image});
+  const StoryImage({super.key, required this.image});
 
   @override
-  State<StoryImages> createState() => _StoryImagesState();
+  State<StoryImage> createState() => _StoryImageState();
 }
 
-class _StoryImagesState extends State<StoryImages> {
+class _StoryImageState extends State<StoryImage> {
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(

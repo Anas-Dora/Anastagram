@@ -1,17 +1,16 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
-
+import 'package:anastagram/Widgets/media/network_video_player.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePicture extends StatefulWidget {
-  final profilePicture;
+class StoryVideo extends StatefulWidget {
+  final String? video;
 
-  const ProfilePicture({super.key, required this.profilePicture});
+  const StoryVideo({super.key, required this.video});
 
   @override
-  State<ProfilePicture> createState() => _ProfilePictureState();
+  State<StoryVideo> createState() => _StoryVideoState();
 }
 
-class _ProfilePictureState extends State<ProfilePicture> {
+class _StoryVideoState extends State<StoryVideo> {
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
@@ -25,10 +24,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child: Image.network(
-                  "${widget.profilePicture}",
-                  fit: BoxFit.cover,
-                ),
+                child: NetworkVideoPlayer(url: '${widget.video}'),
               ),
             ],
           ),

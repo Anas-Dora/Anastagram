@@ -1,14 +1,14 @@
 // ignore_for_file: must_be_immutable
 
+import 'package:anastagram/Pages/history_page.dart';
 import 'package:flutter/material.dart';
-import '../Pages/history.dart';
 
-class CustomizedAppbar extends StatefulWidget implements PreferredSizeWidget {
+class CustomAppbar extends StatefulWidget implements PreferredSizeWidget {
   final String? profileImageUrl;
   final String? username;
   VoidCallback resetValues;
 
-  CustomizedAppbar({
+  CustomAppbar({
     super.key,
     this.profileImageUrl,
     this.username,
@@ -16,13 +16,13 @@ class CustomizedAppbar extends StatefulWidget implements PreferredSizeWidget {
   });
 
   @override
-  State<CustomizedAppbar> createState() => _CustomizedAppbarState();
+  State<CustomAppbar> createState() => _CustomAppbarState();
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
 
-class _CustomizedAppbarState extends State<CustomizedAppbar> {
+class _CustomAppbarState extends State<CustomAppbar> {
   bool isDownloading = false;
   String downloadProgress = "";
 
@@ -57,7 +57,7 @@ class _CustomizedAppbarState extends State<CustomizedAppbar> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => SearchHistory(userName: widget.username),
+              builder: (context) => HistoryPage(userName: widget.username),
             ),
           );
         },

@@ -7,10 +7,10 @@ class NetworkVideoPlayer extends StatefulWidget {
   const NetworkVideoPlayer({super.key, required this.url});
 
   @override
-  _NetworkVideoPlayerState createState() => _NetworkVideoPlayerState();
+  NetworkVideoPlayerState createState() => NetworkVideoPlayerState();
 }
 
-class _NetworkVideoPlayerState extends State<NetworkVideoPlayer> {
+class NetworkVideoPlayerState extends State<NetworkVideoPlayer> {
   late VideoPlayerController _controller;
 
   @override
