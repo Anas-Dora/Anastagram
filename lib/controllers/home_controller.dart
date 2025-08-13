@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../data/userdata.dart';
 import '../services/profile_service.dart';
-import '../data/InstagramApi.dart';
+import '../data/instagram_api.dart';
 import '../utils/snackbar_helper.dart';
 
 class HomeController {
