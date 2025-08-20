@@ -3,7 +3,9 @@ import 'package:anastagram/Widgets/media/media_list.dart';
 import 'package:anastagram/Widgets/profile_actions.dart';
 import 'package:anastagram/Widgets/profile_header.dart';
 import 'package:anastagram/Widgets/profile_stats.dart';
+import 'package:anastagram/Widgets/story_tray_list.dart';
 import 'package:anastagram/Widgets/user_input_dialog.dart';
+import 'package:anastagram/data/story_models.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../controllers/home_controller.dart';
@@ -28,7 +30,11 @@ class _HomePageState extends State<HomePage> {
   bool isPrivate = false;
   bool isSaved = false;
   String saveText = "Speichern";
-  List<Map<String, String>> mediaItems = [];
+  final highlightStories = <StoryBundle>[];
+  List<String> highlightsTitel = [];
+  List<String> highlightsAvatarUrl = [];
+  List<Map<String, String>> storieItems = [];
+  List<Map<String, String>> highlightItems = [];
 
   @override
   void initState() {
@@ -36,13 +42,48 @@ class _HomePageState extends State<HomePage> {
     Hive.openBox<UserData>('userData');
   }
 
-  void _updateProfileData(picUrl, f, fo, s, media, priv) {
+  void _updateProfileData(
+    picUrl,
+    f,
+    fo,
+    s,
+    List<Map<String, String>> newStorieItems,
+    List<Map<String, String>> newHighlightItems,
+    List<String> newHighlightsTitles,
+    List<String> newHighlightsAvatar,
+    priv,
+  ) {
     setState(() {
       profileImageUrl = picUrl;
       followers = f;
       following = fo;
       stories = s;
-      mediaItems = media;
+
+      storieItems = newStorieItems;
+      highlightItems = newHighlightItems;
+      highlightsTitel = newHighlightsTitles;
+      highlightsAvatarUrl = newHighlightsAvatar;
+
+      highlightStories.clear();
+
+      for (int i = 0; i < highlightsAvatarUrl.length; i++) {
+        final avatar = highlightsAvatarUrl[i];
+        final title = i < highlightsTitel.length ? highlightsTitel[i] : '';
+
+        final items = <StoryItemData>[];
+        for (var media in highlightItems) {
+          if (media['type'] == 'image') {
+            items.add(StoryImage(url: media['url']!));
+          } else if (media['type'] == 'video') {
+            items.add(StoryVideo(url: media['url']!));
+          }
+        }
+
+        highlightStories.add(
+          StoryBundle(title: title, avatarUrl: avatar, items: items),
+        );
+      }
+
       isPrivate = priv;
       isReloading = false;
     });
@@ -55,7 +96,7 @@ class _HomePageState extends State<HomePage> {
       following = 0;
       stories = 0;
       username = "";
-      mediaItems.clear();
+      storieItems.clear();
       isPrivate = false;
       isSaved = false;
       saveText = "Speichern";
@@ -98,48 +139,49 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 10),
           isReloading
               ? Center(
-                child: CircularProgressIndicator(color: Color(0xFFa0cafd)),
-              )
+                  child: CircularProgressIndicator(color: Color(0xFFa0cafd)),
+                )
               : ProfileStats(
-                stories: stories,
-                followers: followers,
-                following: following,
-              ),
+                  stories: stories,
+                  followers: followers,
+                  following: following,
+                ),
           const SizedBox(height: 20),
           Center(
             child: ProfileActions(
               isSaved: isSaved,
               saveText: saveText,
-              onSave:
-                  () => controller.saveProfile(username, context, () {
-                    setState(() {
-                      isSaved = true;
-                      saveText = "gespeichert";
-                    });
-                  }),
-              onUnsave:
-                  () => controller.unSaveProfile(username, context, () {
-                    setState(() {
-                      isSaved = false;
-                      saveText = "Speichern";
-                    });
-                  }),
+              onSave: () => controller.saveProfile(username, context, () {
+                setState(() {
+                  isSaved = true;
+                  saveText = "gespeichert";
+                });
+              }),
+              onUnsave: () => controller.unSaveProfile(username, context, () {
+                setState(() {
+                  isSaved = false;
+                  saveText = "Speichern";
+                });
+              }),
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 20),
+          (isPrivate == true || profileImageUrl == null)
+              ? Text("")
+              : StoryTrayList(stories: highlightStories),
           Divider(color: Color(0xff2E3135), thickness: 2),
           const SizedBox(height: 20),
           isPrivate
               ? Text(
-                'IST PRIVAT',
-                style: TextStyle(
-                  color: Color(0xff93000a),
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              )
-              : buildMediaList(mediaItems, context),
+                  'IST PRIVAT',
+                  style: TextStyle(
+                    color: Color(0xff93000a),
+                    fontSize: 35,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                )
+              : buildMediaList(storieItems, context),
         ],
       ),
       floatingActionButton: FloatingActionButton(

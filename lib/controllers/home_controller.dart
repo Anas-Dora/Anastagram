@@ -9,14 +9,32 @@ class HomeController {
   final instagramApi = InstagramApi();
   final profileService = ProfileService();
 
-  Future<void> fetchUserDetails(String username, Function onDataLoaded) async {
+  Future<void> fetchUserDetails(
+    String username,
+    Function(
+      String? picUrl,
+      int followers,
+      int following,
+      int itemsCount,
+      List<Map<String, String>> storieItems,
+      List<Map<String, String>> highlightItems,
+      List<String> highlightsTitles,
+      List<String> highlightsAvatar,
+      bool isPrivate,
+    )
+    onDataLoaded,
+  ) async {
     await instagramApi.getApi(username);
+
     onDataLoaded(
       instagramApi.picURL,
       instagramApi.followers ?? 0,
       instagramApi.following ?? 0,
       instagramApi.itemsCount ?? 0,
-      instagramApi.mediaItems,
+      instagramApi.storieItems,
+      instagramApi.highlightItems,
+      instagramApi.highlightsTitel,
+      instagramApi.highlightsAvatarUrl,
       instagramApi.isPrivate ?? false,
     );
   }
