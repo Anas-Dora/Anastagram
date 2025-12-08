@@ -33,8 +33,8 @@ class _HomePageState extends State<HomePage> {
   final highlightStories = <StoryBundle>[];
   List<String> highlightsTitel = [];
   List<String> highlightsAvatarUrl = [];
+  List<String> highlightsId = [];
   List<Map<String, String>> storieItems = [];
-  List<Map<String, String>> highlightItems = [];
 
   @override
   void initState() {
@@ -48,10 +48,10 @@ class _HomePageState extends State<HomePage> {
     fo,
     s,
     List<Map<String, String>> newStorieItems,
-    List<Map<String, String>> newHighlightItems,
     List<String> newHighlightsTitles,
     List<String> newHighlightsAvatar,
-    priv,
+    List<String> newHighlightsId,
+    bool priv,
   ) {
     setState(() {
       profileImageUrl = picUrl;
@@ -60,27 +60,19 @@ class _HomePageState extends State<HomePage> {
       stories = s;
 
       storieItems = newStorieItems;
-      highlightItems = newHighlightItems;
       highlightsTitel = newHighlightsTitles;
       highlightsAvatarUrl = newHighlightsAvatar;
+      highlightsId = newHighlightsId;
 
       highlightStories.clear();
 
       for (int i = 0; i < highlightsAvatarUrl.length; i++) {
         final avatar = highlightsAvatarUrl[i];
         final title = i < highlightsTitel.length ? highlightsTitel[i] : '';
-
-        final items = <StoryItemData>[];
-        for (var media in highlightItems) {
-          if (media['type'] == 'image') {
-            items.add(StoryImage(url: media['url']!));
-          } else if (media['type'] == 'video') {
-            items.add(StoryVideo(url: media['url']!));
-          }
-        }
+        final storieId = i < highlightsId.length ? highlightsId[i] : '';
 
         highlightStories.add(
-          StoryBundle(title: title, avatarUrl: avatar, items: items),
+          StoryBundle(title: title, avatarUrl: avatar, storieId: storieId),
         );
       }
 

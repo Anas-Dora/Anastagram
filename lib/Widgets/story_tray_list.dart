@@ -1,6 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:anastagram/Pages/story_viewer_page.dart';
 import 'package:anastagram/Widgets/story_tray.dart';
+import 'package:anastagram/data/instagram_api.dart';
 import 'package:anastagram/data/story_models.dart';
+import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 
 class StoryTrayList extends StatelessWidget {
@@ -22,9 +26,21 @@ class StoryTrayList extends StatelessWidget {
           return StoryTray(
             avatarUrl: s.avatarUrl,
             label: s.title,
-            onTap: () {
+            onTapAsync: () async {
+              final api = InstagramApi();
+
+              final items = await api.fetchHighlightItems(s.storieId);
+
+              if (items.isEmpty) {
+                SnackbarHelper.show(context, 'Keine Daten gefunden.');
+                return;
+              }
+
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => StoryViewerPage(bundle: s)),
+                MaterialPageRoute(
+                  builder: (_) =>
+                      StoryViewerPage(bundle: s, highlightItems: items),
+                ),
               );
             },
           );

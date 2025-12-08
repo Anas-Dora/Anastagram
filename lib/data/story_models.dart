@@ -4,12 +4,12 @@ class StoryBundle {
   StoryBundle({
     required this.title,
     required this.avatarUrl,
-    required this.items,
+    required this.storieId,
   });
 
   final String title;
   final String avatarUrl;
-  final List<StoryItemData> items;
+  final String storieId;
 }
 
 sealed class StoryItemData {

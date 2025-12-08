@@ -1,12 +1,18 @@
 import 'package:anastagram/data/story_models.dart';
+import 'package:anastagram/utils/date_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:story_view/controller/story_controller.dart';
 import 'package:story_view/utils.dart';
 import 'package:story_view/widgets/story_view.dart';
 
 class StoryViewerPage extends StatefulWidget {
-  const StoryViewerPage({super.key, required this.bundle});
+  const StoryViewerPage({
+    super.key,
+    required this.bundle,
+    required this.highlightItems,
+  });
   final StoryBundle bundle;
+  final List<Map<String, String>> highlightItems;
 
   @override
   State<StoryViewerPage> createState() => _StoryViewerPageState();
@@ -14,6 +20,7 @@ class StoryViewerPage extends StatefulWidget {
 
 class _StoryViewerPageState extends State<StoryViewerPage> {
   final StoryController _controller = StoryController();
+  ValueNotifier<int> currentIndex = ValueNotifier(0);
 
   @override
   void dispose() {
@@ -23,8 +30,9 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final items = widget.bundle.items
-        .map((i) => i.toStoryItem(_controller))
+    final items = widget.highlightItems.toList(growable: false);
+    final highlightsTime = widget.highlightItems
+        .map((item) => item['time'] ?? '')
         .toList(growable: false);
 
     return Scaffold(
@@ -33,8 +41,28 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
         child: Stack(
           children: [
             StoryView(
-              storyItems: items,
+              storyItems: items.map((item) {
+                final type = item['type'];
+                final url = item['url'] ?? '';
+
+                if (type == 'video') {
+                  return StoryItem.pageVideo(
+                    url,
+                    controller: _controller,
+                    duration: const Duration(seconds: 10),
+                  );
+                } else {
+                  return StoryItem.pageImage(
+                    url: url,
+                    controller: _controller,
+                    duration: const Duration(seconds: 5),
+                  );
+                }
+              }).toList(),
               controller: _controller,
+              onStoryShow: (storyItem, index) {
+                currentIndex.value = index;
+              },
               onComplete: () => Navigator.of(context).maybePop(),
               onVerticalSwipeComplete: (direction) {
                 if (direction == Direction.down) {
@@ -63,9 +91,21 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const Text(
-                          'Just now',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ValueListenableBuilder<int>(
+                          valueListenable: currentIndex,
+                          builder: (_, index, __) {
+                            return Text(
+                              highlightsTime.isNotEmpty
+                                  ? DateFormatter.extractDate(
+                                      highlightsTime[index],
+                                    )
+                                  : '',
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

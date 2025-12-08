@@ -17,9 +17,9 @@ class HomeController {
       int following,
       int itemsCount,
       List<Map<String, String>> storieItems,
-      List<Map<String, String>> highlightItems,
       List<String> highlightsTitles,
       List<String> highlightsAvatar,
+      List<String> highlightsId,
       bool isPrivate,
     )
     onDataLoaded,
@@ -32,9 +32,9 @@ class HomeController {
       instagramApi.following ?? 0,
       instagramApi.itemsCount ?? 0,
       instagramApi.storieItems,
-      instagramApi.highlightItems,
       instagramApi.highlightsTitel,
       instagramApi.highlightsAvatarUrl,
+      instagramApi.highlightsId,
       instagramApi.isPrivate ?? false,
     );
   }

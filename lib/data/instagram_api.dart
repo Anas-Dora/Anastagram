@@ -9,8 +9,8 @@ class InstagramApi {
   bool? _isPrivate;
   final List<String> _highlightsTitel = [];
   final List<String> _highlightsAvatarUrl = [];
+  final List<String> _highlightsId = [];
   final List<Map<String, String>> _storieItems = [];
-  final List<Map<String, String>> _highlightItems = [];
 
   Future<void> getApi(String userName) async {
     final infoUrl = Uri.parse(
@@ -55,11 +55,7 @@ class InstagramApi {
         final Map<String, dynamic> jsonResponseHighlights = json.decode(
           highlightsResponse.body,
         );
-
-        await fetchHighlightItems(
-          _parseHighlightsId(jsonResponseHighlights),
-          headers,
-        );
+        _parseHighlightsId(jsonResponseHighlights);
         _parseHighlightsTitel(jsonResponseHighlights);
         _parseHighlightsAvatarUrl(jsonResponseHighlights);
       }
@@ -69,6 +65,10 @@ class InstagramApi {
   }
 
   void _parseInfoData(Map<String, dynamic> data) {
+    _picURL = "";
+    _followers = 0;
+    _isPrivate = false;
+    _following = 0;
     final info = data['data'];
     if (info != null) {
       _picURL = info['hd_profile_pic_url_info']?['url'];
@@ -79,6 +79,8 @@ class InstagramApi {
   }
 
   void _parseStoryData(Map<String, dynamic> data) {
+    _storieItems.clear();
+    _itemsCount = 0;
     final items = data['data']?['items'];
     if (items != null) {
       for (var item in items) {
@@ -95,21 +97,18 @@ class InstagramApi {
     }
   }
 
-  List<String> _parseHighlightsId(Map<String, dynamic> data) {
-    final ids = <String>[];
-
+  void _parseHighlightsId(Map<String, dynamic> data) {
+    _highlightsId.clear();
     final items = data['data']?['items'];
     if (items != null && items is List) {
       for (var highlight in items) {
         final id = highlight['id'];
         if (id != null) {
           final cleanId = id.toString().replaceFirst('highlight:', '');
-          ids.add(cleanId);
+          _highlightsId.add(cleanId);
         }
       }
     }
-
-    return ids;
   }
 
   void _parseHighlightsTitel(Map<String, dynamic> data) {
@@ -138,45 +137,46 @@ class InstagramApi {
     }
   }
 
-  Future<void> fetchHighlightItems(
-    List<String> highlightIds,
-    final headers,
+  Future<List<Map<String, String>>> fetchHighlightItems(
+    String highlightId,
   ) async {
-    for (String highlightId in highlightIds) {
-      final url = Uri.parse(
-        "https://mediafy-api.p.rapidapi.com/v1/highlight_info?highlight_id=$highlightId",
-      );
+    List<Map<String, String>> highlightItems = [];
+    final headers = {
+      'x-rapidapi-key': 'c05c767a00msh453fb621e171c94p1e536ajsn972c2f9806b5',
+      'x-rapidapi-host': 'mediafy-api.p.rapidapi.com',
+    };
+    final url = Uri.parse(
+      "https://mediafy-api.p.rapidapi.com/v1/highlight_info?highlight_id=$highlightId",
+    );
 
-      final response = await http.get(url, headers: headers);
+    final response = await http.get(url, headers: headers);
 
-      if (response.statusCode == 200) {
-        Map<String, dynamic> data = json.decode(response.body);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
 
-        final items = data['data']?['items'];
+      final items = data['data']?['items'];
 
-        if (items != null && items.isNotEmpty) {
-          for (var item in items) {
-            final String? time = item['taken_at_date'];
-            final bool isVideo = item['is_video'] ?? false;
+      if (items != null && items.isNotEmpty) {
+        for (var item in items) {
+          final String? time = item['taken_at_date'];
+          final bool isVideo = item['is_video'] ?? false;
 
-            final String? mediaUrl = isVideo
-                ? item['video_url']
-                : item['thumbnail_url'];
-            _highlightItems.addAll([
-              {
-                'type': isVideo ? 'video' : 'image',
-                'url': ?mediaUrl,
-                if (time != null) 'time': time,
-              },
-            ]);
-          }
+          final String? mediaUrl = isVideo
+              ? item['video_url']
+              : item['thumbnail_url'];
+          highlightItems.add({
+            'type': isVideo ? 'video' : 'image',
+            'url': ?mediaUrl,
+            if (time != null) 'time': time,
+          });
         }
-      } else {
-        print(
-          "Fehler beim Abrufen von Highlight $highlightId: ${response.statusCode}",
-        );
       }
+    } else {
+      print(
+        "Fehler beim Abrufen von Highlight $highlightId: ${response.statusCode}",
+      );
     }
+    return highlightItems;
   }
 
   void _addStoriesItem(String? url, String type, String? time) {
@@ -198,14 +198,7 @@ class InstagramApi {
   int? get itemsCount => _itemsCount;
   bool? get isPrivate => _isPrivate;
   List<Map<String, String>> get storieItems => _storieItems;
-  List<Map<String, String>> get highlightItems => _highlightItems;
   List<String> get highlightsTitel => _highlightsTitel;
   List<String> get highlightsAvatarUrl => _highlightsAvatarUrl;
-
-  String extractTime(String datetime) {
-    DateTime parsedDateTime = DateTime.parse(datetime);
-    String hour = parsedDateTime.hour.toString().padLeft(2, '0');
-    String minute = parsedDateTime.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
+  List<String> get highlightsId => _highlightsId;
 }

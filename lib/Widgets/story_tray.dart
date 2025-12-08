@@ -1,16 +1,39 @@
 import 'package:flutter/material.dart';
 
-class StoryTray extends StatelessWidget {
+class StoryTray extends StatefulWidget {
   const StoryTray({
     super.key,
     required this.avatarUrl,
     required this.label,
-    required this.onTap,
+    required this.onTapAsync,
   });
 
   final String avatarUrl;
   final String label;
-  final VoidCallback onTap;
+  final Future<void> Function() onTapAsync;
+
+  @override
+  State<StoryTray> createState() => _StoryTrayState();
+}
+
+class _StoryTrayState extends State<StoryTray> {
+  bool _isLoading = false;
+
+  Future<void> _handleTap() async {
+    if (_isLoading) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await widget.onTapAsync();
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,32 +43,35 @@ class StoryTray extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: onTap,
-            child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFF58529),
-                    Color(0xFFDD2A7B),
-                    Color(0xFF8134AF),
-                    Color(0xFF515BD4),
-                  ],
+            onTap: _handleTap,
+            child: Stack(
+              children: [
+                if (_isLoading)
+                  SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 5,
+                      color: Color(0xff003258),
+                      backgroundColor: Colors.white24,
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFa0cafd),
+                  ),
+                  child: CircleAvatar(
+                    radius: 32,
+                    backgroundImage: NetworkImage(widget.avatarUrl),
+                  ),
                 ),
-              ),
-              child: CircleAvatar(
-                radius: 32,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  radius: 29,
-                  backgroundImage: NetworkImage(avatarUrl),
-                ),
-              ),
+              ],
             ),
           ),
           Text(
-            label,
+            widget.label,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,

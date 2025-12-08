@@ -1,5 +1,6 @@
 // ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables
 
+import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,17 +15,6 @@ class ProfileNameTile extends StatefulWidget {
 }
 
 class _ProfileNameTileState extends State<ProfileNameTile> {
-  final snackBar = SnackBar(
-    backgroundColor: Color(0xffe1e2e8),
-    duration: const Duration(milliseconds: 900),
-    content: const Text(
-      'Kopiert',
-      style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xff2e3135)),
-      textAlign: TextAlign.center,
-    ),
-    behavior: SnackBarBehavior.floating,
-  );
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -35,7 +25,7 @@ class _ProfileNameTileState extends State<ProfileNameTile> {
             onTap: () {
               final data = ClipboardData(text: widget.profileName);
               Clipboard.setData(data);
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              SnackbarHelper.show(context, 'Kopiert');
             },
             onLongPress: () {
               setState(() {
@@ -55,12 +45,12 @@ class _ProfileNameTileState extends State<ProfileNameTile> {
                   (widget.profileName == null)
                       ? const Text("")
                       : Text(
-                        "${widget.profileName}",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Color(0xff194975),
+                          "${widget.profileName}",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            color: Color(0xff194975),
+                          ),
                         ),
-                      ),
                 ],
               ),
             ),
