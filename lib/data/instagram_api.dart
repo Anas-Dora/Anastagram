@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:anastagram/utils/app_logger.dart';
 import 'package:http/http.dart' as http;
 
 class InstagramApi {
@@ -60,7 +61,7 @@ class InstagramApi {
         _parseHighlightsAvatarUrl(jsonResponseHighlights);
       }
     } catch (e) {
-      print("Error fetching data: $e");
+      AppLogger.e("Error fetching data: ", e);
     }
   }
 
@@ -172,7 +173,7 @@ class InstagramApi {
         }
       }
     } else {
-      print(
+      AppLogger.e(
         "Fehler beim Abrufen von Highlight $highlightId: ${response.statusCode}",
       );
     }

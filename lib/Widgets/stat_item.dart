@@ -1,4 +1,3 @@
-// stat_item.dart
 import 'package:flutter/material.dart';
 
 Widget buildStatItem(String label, int value) {

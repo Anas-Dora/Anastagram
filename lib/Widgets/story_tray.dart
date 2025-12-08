@@ -51,7 +51,7 @@ class _StoryTrayState extends State<StoryTray> {
                     width: 70,
                     height: 70,
                     child: CircularProgressIndicator(
-                      strokeWidth: 5,
+                      strokeWidth: 10,
                       color: Color(0xff003258),
                       backgroundColor: Colors.white24,
                     ),

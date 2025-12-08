@@ -1,7 +1,6 @@
-// ignore_for_file: must_be_immutable, use_build_context_synchronously
-
 import 'dart:typed_data';
 import 'package:anastagram/Pages/history_page.dart';
+import 'package:anastagram/utils/app_logger.dart';
 import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -11,9 +10,9 @@ import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 class CustomAppbar extends StatefulWidget implements PreferredSizeWidget {
   final String? profileImageUrl;
   final String? username;
-  VoidCallback resetValues;
+  final VoidCallback resetValues;
 
-  CustomAppbar({
+  const CustomAppbar({
     super.key,
     this.profileImageUrl,
     this.username,
@@ -38,6 +37,7 @@ class _CustomAppbarState extends State<CustomAppbar> {
     }
 
     if (!status.isGranted) {
+      if (!mounted) return;
       SnackbarHelper.show(context, "Speicherberechtigung verweigert");
       setState(() => isDownloading = false);
       return;
@@ -51,16 +51,16 @@ class _CustomAppbarState extends State<CustomAppbar> {
       );
 
       // In Galerie speichern
-      final result = await ImageGallerySaverPlus.saveImage(
+      await ImageGallerySaverPlus.saveImage(
         Uint8List.fromList(response.data),
         quality: 80,
         name: "anastagram_profile_${DateTime.now().millisecondsSinceEpoch}",
       );
 
+      if (!mounted) return;
       SnackbarHelper.show(context, "Bild gespeichert");
-      print("Speicher-Resultat: $result");
     } catch (e) {
-      SnackbarHelper.show(context, "Fehler beim Speichern des Bildes");
+      AppLogger.e("Fehler beim Herunterladen des Bildes: ", e);
     }
     setState(() => isDownloading = false);
   }
@@ -96,25 +96,23 @@ class _CustomAppbarState extends State<CustomAppbar> {
           Row(
             children: [
               IconButton(
-                onPressed:
-                    isDownloading
-                        ? null
-                        : () async {
-                          if (widget.profileImageUrl != null) {
-                            await _downloadImage(widget.profileImageUrl!);
-                          }
-                        },
-                icon:
-                    isDownloading
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                        : const Icon(Icons.download, color: Color(0xFFe1e2e8)),
+                onPressed: isDownloading
+                    ? null
+                    : () async {
+                        if (widget.profileImageUrl != null) {
+                          await _downloadImage(widget.profileImageUrl!);
+                        }
+                      },
+                icon: isDownloading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.download, color: Color(0xFFe1e2e8)),
                 tooltip: "Profilbild herunterladen",
               ),
               IconButton(

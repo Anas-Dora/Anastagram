@@ -1,11 +1,9 @@
-// ignore_for_file: non_constant_identifier_names, prefer_typing_uninitialized_variables
-
 import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ProfileNameTile extends StatefulWidget {
-  final profileName;
+  final String? profileName;
   final void Function()? deleteProfile;
 
   const ProfileNameTile({super.key, this.profileName, this.deleteProfile});
@@ -23,7 +21,7 @@ class _ProfileNameTileState extends State<ProfileNameTile> {
         children: [
           GestureDetector(
             onTap: () {
-              final data = ClipboardData(text: widget.profileName);
+              final data = ClipboardData(text: widget.profileName ?? '');
               Clipboard.setData(data);
               SnackbarHelper.show(context, 'Kopiert');
             },

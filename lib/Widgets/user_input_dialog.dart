@@ -1,5 +1,3 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
 
 class UserInputDialog extends StatefulWidget {
@@ -28,16 +26,15 @@ class _UserInputDialogState extends State<UserInputDialog> {
         decoration: InputDecoration(
           labelText: "Nutzername",
           labelStyle: TextStyle(color: Color(0xffa0cafd)),
-          suffixIcon:
-              _usernameController.text.trim().isEmpty
-                  ? const SizedBox(width: 0, height: 0)
-                  : IconButton(
-                    icon: const Icon(Icons.clear),
-                    color: const Color(0xffa0cafd),
-                    onPressed: () {
-                      _usernameController.clear();
-                    },
-                  ),
+          suffixIcon: _usernameController.text.trim().isEmpty
+              ? const SizedBox(width: 0, height: 0)
+              : IconButton(
+                  icon: const Icon(Icons.clear),
+                  color: const Color(0xffa0cafd),
+                  onPressed: () {
+                    _usernameController.clear();
+                  },
+                ),
           focusedBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Color(0xffa0cafd)),
           ),

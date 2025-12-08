@@ -1,4 +1,3 @@
-// media_list.dart
 import 'package:anastagram/Widgets/media/story_images.dart';
 import 'package:anastagram/utils/date_formatter.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,7 @@
-// ignore_for_file: prefer_typing_uninitialized_variables
-
 import 'package:flutter/material.dart';
 
 class ProfileImageViewer extends StatefulWidget {
-  final picture;
+  final String picture;
 
   const ProfileImageViewer({super.key, required this.picture});
 
@@ -25,7 +23,7 @@ class _ProfileImageViewerState extends State<ProfileImageViewer> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-                child: Image.network("${widget.picture}", fit: BoxFit.cover),
+                child: Image.network(widget.picture, fit: BoxFit.cover),
               ),
             ],
           ),
