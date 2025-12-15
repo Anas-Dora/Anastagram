@@ -1,4 +1,6 @@
+import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'profile_image.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -23,19 +25,25 @@ class ProfileHeader extends StatelessWidget {
             border: Border.all(color: Color(0xFF194975), width: 5),
           ),
           child: ClipOval(
-            child:
-                profileImageUrl == null
-                    ? Image.asset("images/test.jpg", fit: BoxFit.cover)
-                    : ProfileImage(profileImage: profileImageUrl!),
+            child: profileImageUrl == null
+                ? Image.asset("images/test.jpg", fit: BoxFit.cover)
+                : ProfileImage(profileImage: profileImageUrl!),
           ),
         ),
         const SizedBox(height: 10),
-        Text(
-          username,
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Color(0xffa0cafd),
+        GestureDetector(
+          onLongPress: () {
+            final data = ClipboardData(text: username);
+            Clipboard.setData(data);
+            SnackbarHelper.show(context, 'Kopiert');
+          },
+          child: Text(
+            username,
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Color(0xffa0cafd),
+            ),
           ),
         ),
       ],
