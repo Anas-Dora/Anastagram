@@ -5,184 +5,183 @@ import 'package:anastagram/Widgets/profile_header.dart';
 import 'package:anastagram/Widgets/profile_stats.dart';
 import 'package:anastagram/Widgets/story_tray_list.dart';
 import 'package:anastagram/Widgets/user_input_dialog.dart';
+import 'package:anastagram/app/theme/app_colors.dart';
+import 'package:anastagram/core/models/action_feedback.dart';
 import 'package:anastagram/data/story_models.dart';
+import 'package:anastagram/features/home/view_models/home_view_model.dart';
+import 'package:anastagram/shared/widgets/empty_state.dart';
+import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import '../controllers/home_controller.dart';
-import '../data/userdata.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatefulWidget {
+import 'history_page.dart';
+import 'story_viewer_page.dart';
+
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final controller = HomeController();
-
-  String? profileImageUrl;
-  int followers = 0;
-  int following = 0;
-  int stories = 0;
-  String username = "";
-  bool isReloading = false;
-  bool isPrivate = false;
-  bool isSaved = false;
-  String saveText = "Speichern";
-  final highlightStories = <StoryBundle>[];
-  List<String> highlightsTitel = [];
-  List<String> highlightsAvatarUrl = [];
-  List<String> highlightsId = [];
-  List<Map<String, String>> storieItems = [];
-
-  @override
-  void initState() {
-    super.initState();
-    Hive.openBox<UserData>('userData');
-  }
-
-  void _updateProfileData(
-    picUrl,
-    f,
-    fo,
-    s,
-    List<Map<String, String>> newStorieItems,
-    List<String> newHighlightsTitles,
-    List<String> newHighlightsAvatar,
-    List<String> newHighlightsId,
-    bool priv,
-  ) {
-    setState(() {
-      profileImageUrl = picUrl;
-      followers = f;
-      following = fo;
-      stories = s;
-
-      storieItems = newStorieItems;
-      highlightsTitel = newHighlightsTitles;
-      highlightsAvatarUrl = newHighlightsAvatar;
-      highlightsId = newHighlightsId;
-
-      highlightStories.clear();
-
-      for (int i = 0; i < highlightsAvatarUrl.length; i++) {
-        final avatar = highlightsAvatarUrl[i];
-        final title = i < highlightsTitel.length ? highlightsTitel[i] : '';
-        final storieId = i < highlightsId.length ? highlightsId[i] : '';
-
-        highlightStories.add(
-          StoryBundle(title: title, avatarUrl: avatar, storieId: storieId),
-        );
-      }
-
-      isPrivate = priv;
-      isReloading = false;
-    });
-  }
-
-  void _resetValues() {
-    setState(() {
-      profileImageUrl = null;
-      followers = 0;
-      following = 0;
-      stories = 0;
-      username = "";
-      storieItems.clear();
-      isPrivate = false;
-      isSaved = false;
-      saveText = "Speichern";
-    });
-  }
-
-  Future<void> _showUserInputDialog() async {
+  Future<void> _showUserInputDialog(BuildContext context, WidgetRef ref) async {
     final profileName = await showDialog<String>(
       context: context,
       builder: (_) => const UserInputDialog(),
     );
 
-    if (profileName != null && profileName.isNotEmpty) {
-      setState(() {
-        username = profileName.trim();
-        isReloading = true;
-      });
+    if (profileName == null || profileName.trim().isEmpty) {
+      return;
+    }
 
-      controller.fetchUserDetails(username, _updateProfileData);
-      setState(() {
-        isSaved = controller.isProfileSaved(username);
-        saveText = isSaved ? "gespeichert" : "Speichern";
-      });
+    final feedback = await ref
+        .read(homeViewModelProvider.notifier)
+        .searchProfile(profileName);
+
+    if (context.mounted) {
+      _showFeedback(context, feedback);
     }
   }
 
+  Future<void> _openHistory(BuildContext context, WidgetRef ref) async {
+    final selectedUsername = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const HistoryPage()),
+    );
+
+    if (selectedUsername == null || selectedUsername.trim().isEmpty) {
+      return;
+    }
+
+    final feedback = await ref
+        .read(homeViewModelProvider.notifier)
+        .searchProfile(selectedUsername);
+
+    if (context.mounted) {
+      _showFeedback(context, feedback);
+    }
+  }
+
+  Future<void> _toggleSaved(BuildContext context, WidgetRef ref) async {
+    final feedback = await ref.read(homeViewModelProvider.notifier).toggleSaved();
+    if (context.mounted) {
+      _showFeedback(context, feedback);
+    }
+  }
+
+  Future<void> _openHighlight(
+    BuildContext context,
+    WidgetRef ref,
+    HighlightStory story,
+  ) async {
+    final items = await ref
+        .read(homeViewModelProvider.notifier)
+        .loadHighlightItems(story.id);
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (items.isEmpty) {
+      SnackbarHelper.show(context, 'Keine Highlight-Daten gefunden.');
+      return;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => StoryViewerPage(highlight: story, highlightItems: items),
+      ),
+    );
+  }
+
+  void _showFeedback(BuildContext context, ActionFeedback? feedback) {
+    if (feedback == null) {
+      return;
+    }
+
+    SnackbarHelper.show(
+      context,
+      feedback.message,
+      backgroundColor: feedback.isError
+          ? AppColors.error
+          : const Color(0xffe1e2e8),
+      textColor: feedback.isError ? Colors.white : const Color(0xff2e3135),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(homeViewModelProvider);
+    final profile = state.profile;
+
     return Scaffold(
-      backgroundColor: Color(0xff191C20),
       appBar: CustomAppbar(
-        profileImageUrl: profileImageUrl,
-        username: username,
-        resetValues: _resetValues,
+        profileImageUrl: profile?.profileImageUrl,
+        onOpenHistory: () => _openHistory(context, ref),
+        onReset: ref.read(homeViewModelProvider.notifier).reset,
+        onDownloadProfileImage: ref
+            .read(homeViewModelProvider.notifier)
+            .downloadProfileImage,
       ),
       body: ListView(
+        padding: const EdgeInsets.only(bottom: 100),
         children: [
           const SizedBox(height: 20),
-          ProfileHeader(profileImageUrl: profileImageUrl, username: username),
-          const SizedBox(height: 10),
-          isReloading
-              ? Center(
-                  child: CircularProgressIndicator(color: Color(0xFFa0cafd)),
-                )
-              : ProfileStats(
-                  stories: stories,
-                  followers: followers,
-                  following: following,
-                ),
-          const SizedBox(height: 20),
-          Center(
-            child: ProfileActions(
-              isSaved: isSaved,
-              saveText: saveText,
-              onSave: () => controller.saveProfile(username, context, () {
-                setState(() {
-                  isSaved = true;
-                  saveText = "gespeichert";
-                });
-              }),
-              onUnsave: () => controller.unSaveProfile(username, context, () {
-                setState(() {
-                  isSaved = false;
-                  saveText = "Speichern";
-                });
-              }),
-            ),
+          ProfileHeader(
+            profileImageUrl: profile?.profileImageUrl,
+            username: state.username,
           ),
-          const SizedBox(height: 20),
-          (isPrivate == true || profileImageUrl == null)
-              ? Text("")
-              : StoryTrayList(stories: highlightStories),
-          Divider(color: Color(0xff2E3135), thickness: 2),
-          const SizedBox(height: 20),
-          isPrivate
-              ? Text(
-                  'IST PRIVAT',
-                  style: TextStyle(
-                    color: Color(0xff93000a),
-                    fontSize: 35,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                )
-              : buildMediaList(storieItems, context),
+          const SizedBox(height: 16),
+          if (state.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (profile == null)
+            const EmptyState(
+              icon: Icons.search,
+              title: 'Suche ein Instagram-Profil',
+              subtitle:
+                  'Tippe unten rechts auf die Suche und gib einen Benutzernamen ein.',
+            )
+          else ...[
+            ProfileStats(
+              stories: profile.storiesCount,
+              followers: profile.followers,
+              following: profile.following,
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: ProfileActions(
+                isSaved: state.isSaved,
+                onToggleSaved: () => _toggleSaved(context, ref),
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (!profile.isPrivate && profile.highlights.isNotEmpty)
+              StoryTrayList(
+                stories: profile.highlights,
+                onOpenStory: (story) => _openHighlight(context, ref, story),
+              ),
+            const Divider(color: AppColors.divider, thickness: 2),
+            const SizedBox(height: 20),
+            if (profile.isPrivate)
+              const Text(
+                'Dieses Profil ist privat.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            else if (profile.stories.isEmpty)
+              const EmptyState(
+                icon: Icons.photo_library_outlined,
+                title: 'Keine Story-Medien gefunden',
+                subtitle: 'Für dieses Profil wurden aktuell keine Stories geladen.',
+              )
+            else
+              MediaList(mediaItems: profile.stories),
+          ],
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          _resetValues();
-          await _showUserInputDialog();
-        },
-        backgroundColor: Color(0xff194975),
-        child: Icon(Icons.search, color: Color(0xffD1E4FF)),
+        onPressed: () => _showUserInputDialog(context, ref),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.search, color: Color(0xffD1E4FF)),
       ),
     );
   }

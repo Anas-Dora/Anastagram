@@ -8,11 +8,12 @@ import 'package:story_view/widgets/story_view.dart';
 class StoryViewerPage extends StatefulWidget {
   const StoryViewerPage({
     super.key,
-    required this.bundle,
+    required this.highlight,
     required this.highlightItems,
   });
-  final StoryBundle bundle;
-  final List<Map<String, String>> highlightItems;
+
+  final HighlightStory highlight;
+  final List<MediaItem> highlightItems;
 
   @override
   State<StoryViewerPage> createState() => _StoryViewerPageState();
@@ -31,9 +32,6 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
   @override
   Widget build(BuildContext context) {
     final items = widget.highlightItems.toList(growable: false);
-    final highlightsTime = widget.highlightItems
-        .map((item) => item['time'] ?? '')
-        .toList(growable: false);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -42,10 +40,9 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
           children: [
             StoryView(
               storyItems: items.map((item) {
-                final type = item['type'];
-                final url = item['url'] ?? '';
+                final url = item.url;
 
-                if (type == 'video') {
+                if (item.isVideo) {
                   return StoryItem.pageVideo(
                     url,
                     controller: _controller,
@@ -77,7 +74,7 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(widget.bundle.avatarUrl),
+                    backgroundImage: NetworkImage(widget.highlight.avatarUrl),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -85,7 +82,7 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.bundle.title,
+                          widget.highlight.title,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -95,9 +92,9 @@ class _StoryViewerPageState extends State<StoryViewerPage> {
                           valueListenable: currentIndex,
                           builder: (_, index, __) {
                             return Text(
-                              highlightsTime.isNotEmpty
+                              items.isNotEmpty
                                   ? DateFormatter.extractDate(
-                                      highlightsTime[index],
+                                      items[index].takenAt,
                                     )
                                   : '',
                               style: const TextStyle(

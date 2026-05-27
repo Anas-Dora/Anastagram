@@ -15,6 +15,8 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayName = username.trim().isEmpty ? 'Noch kein Profil geladen' : username;
+
     return Column(
       children: [
         Container(
@@ -32,18 +34,21 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         GestureDetector(
-          onLongPress: () {
+          onLongPress: username.trim().isEmpty
+              ? null
+              : () {
             final data = ClipboardData(text: username);
             Clipboard.setData(data);
             SnackbarHelper.show(context, 'Kopiert');
           },
           child: Text(
-            username,
+            displayName,
             style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
-              color: Color(0xffa0cafd),
+              color: const Color(0xffa0cafd),
             ),
+            textAlign: TextAlign.center,
           ),
         ),
       ],

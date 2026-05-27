@@ -1,4 +1,4 @@
-import 'package:anastagram/Widgets/profile_image_viewer.dart';
+import 'package:anastagram/shared/widgets/fullscreen_media_page.dart';
 import 'package:flutter/material.dart';
 
 class ProfileImage extends StatelessWidget {
@@ -12,7 +12,7 @@ class ProfileImage extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: ((context) => ProfileImageViewer(picture: profileImage)),
+            builder: (_) => FullscreenMediaPage.image(url: profileImage),
           ),
         );
       },

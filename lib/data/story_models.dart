@@ -1,41 +1,28 @@
-import 'package:story_view/story_view.dart';
+enum MediaType { image, video }
 
-class StoryBundle {
-  StoryBundle({
+class HighlightStory {
+  const HighlightStory({
     required this.title,
     required this.avatarUrl,
-    required this.storieId,
+    required this.id,
   });
 
   final String title;
   final String avatarUrl;
-  final String storieId;
+  final String id;
 }
 
-sealed class StoryItemData {
-  StoryItem toStoryItem(StoryController controller);
-}
+class MediaItem {
+  const MediaItem({
+    required this.type,
+    required this.url,
+    this.takenAt,
+  });
 
-class StoryImage extends StoryItemData {
-  StoryImage({required this.url});
+  final MediaType type;
   final String url;
+  final DateTime? takenAt;
 
-  @override
-  StoryItem toStoryItem(StoryController controller) {
-    return StoryItem.pageImage(
-      url: url,
-      controller: controller,
-      duration: const Duration(seconds: 5),
-    );
-  }
-}
-
-class StoryVideo extends StoryItemData {
-  StoryVideo({required this.url});
-  final String url;
-
-  @override
-  StoryItem toStoryItem(StoryController controller) {
-    return StoryItem.pageVideo(url, controller: controller);
-  }
+  bool get isVideo => type == MediaType.video;
+  bool get isImage => type == MediaType.image;
 }

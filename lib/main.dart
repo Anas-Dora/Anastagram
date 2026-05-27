@@ -1,9 +1,9 @@
+import 'package:anastagram/app/app.dart';
 import 'package:anastagram/data/profile.dart';
 import 'package:anastagram/data/userdata.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
-import 'Pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +13,7 @@ void main() async {
   Hive.registerAdapter(UserDataAdapter());
 
   await Hive.openBox<UserData>('userData');
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -21,17 +21,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        textSelectionTheme: TextSelectionThemeData(
-          selectionColor: Colors.blue[100],
-          cursorColor: Colors.blue[800],
-          selectionHandleColor: Colors.blue[800],
-        ),
-      ),
-      home: HomePage(),
-    );
+    return const AnastagramApp();
   }
 }

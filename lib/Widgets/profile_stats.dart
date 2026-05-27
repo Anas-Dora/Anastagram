@@ -18,11 +18,11 @@ class ProfileStats extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        buildStatItem('Stories', stories),
+        StatItem(label: 'Stories', value: stories),
         const SizedBox(width: 20),
-        buildStatItem('Followers', followers),
+        StatItem(label: 'Followers', value: followers),
         const SizedBox(width: 20),
-        buildStatItem('Following', following),
+        StatItem(label: 'Following', value: following),
       ],
     );
   }

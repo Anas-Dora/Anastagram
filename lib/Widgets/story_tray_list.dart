@@ -1,16 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:anastagram/Pages/story_viewer_page.dart';
 import 'package:anastagram/Widgets/story_tray.dart';
-import 'package:anastagram/data/instagram_api.dart';
 import 'package:anastagram/data/story_models.dart';
-import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 
 class StoryTrayList extends StatelessWidget {
-  final List<StoryBundle> stories;
+  final List<HighlightStory> stories;
+  final Future<void> Function(HighlightStory story) onOpenStory;
 
-  const StoryTrayList({super.key, required this.stories});
+  const StoryTrayList({
+    super.key,
+    required this.stories,
+    required this.onOpenStory,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,23 +26,7 @@ class StoryTrayList extends StatelessWidget {
           return StoryTray(
             avatarUrl: s.avatarUrl,
             label: s.title,
-            onTapAsync: () async {
-              final api = InstagramApi();
-
-              final items = await api.fetchHighlightItems(s.storieId);
-
-              if (items.isEmpty) {
-                SnackbarHelper.show(context, 'Keine Daten gefunden.');
-                return;
-              }
-
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) =>
-                      StoryViewerPage(bundle: s, highlightItems: items),
-                ),
-              );
-            },
+            onTapAsync: () => onOpenStory(s),
           );
         },
       ),

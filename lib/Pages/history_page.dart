@@ -1,104 +1,58 @@
 import 'package:anastagram/Widgets/profile_name_tile.dart';
-import 'package:anastagram/data/userdata.dart';
-import 'package:hive/hive.dart';
-
+import 'package:anastagram/app/theme/app_colors.dart';
+import 'package:anastagram/features/history/view_models/saved_profiles_view_model.dart';
+import 'package:anastagram/shared/widgets/empty_state.dart';
+import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HistoryPage extends StatefulWidget {
-  final String? userName;
-
-  const HistoryPage({super.key, required this.userName});
+class HistoryPage extends ConsumerWidget {
+  const HistoryPage({super.key});
 
   @override
-  State<HistoryPage> createState() => _HistoryPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profiles = ref.watch(savedProfilesProvider);
 
-void deletePage(context, String profileName) async {}
-Box<UserData> box = Hive.box<UserData>('userData');
-UserData userData = box.get('mainUser') ?? UserData(profiles: []);
-bool empety = false;
-
-@override
-void initState() {
-  box;
-  userData;
-  empety = userData.profiles.isEmpty;
-}
-
-class _HistoryPageState extends State<HistoryPage> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xff191C20),
       appBar: AppBar(
-        leading: Tooltip(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
-          ),
-          message: "Zurück",
-          textStyle: TextStyle(color: Colors.white),
-          child: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back, color: Color(0xFFe1e2e8)),
-          ),
+        title: const Text(
+          'Gespeicherte Profile',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        elevation: 0,
-        backgroundColor: Color(0xff272a2f),
-        title: Text(
-          "Anastagram",
-          style: TextStyle(
-            color: Color(0xFFe1e2e8),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
       ),
-      body: empety
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.bookmarks_outlined,
-                    size: 100,
-                    color: Color(0xFFa0cafd),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "Keine gespeicherte \nprofilen",
-                    style: TextStyle(
-                      color: Color(0xFFa0cafd),
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+      body: profiles.isEmpty
+          ? const EmptyState(
+              icon: Icons.bookmarks_outlined,
+              title: 'Keine gespeicherten Profile',
+              subtitle:
+                  'Speichere ein Profil auf der Startseite, um es hier wiederzufinden.',
             )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: userData.profiles.length,
-                    itemBuilder: (context, index) {
-                      return ProfileNameTile(
-                        profileName:
-                            userData.profiles[index].name ?? "Unbenannt",
-                        deleteProfile: () async {
-                          userData.profiles.removeAt(index);
-                          await box.put('mainUser', userData);
-                          setState(() {
-                            empety = userData.profiles.isEmpty;
-                          });
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              itemCount: profiles.length,
+              itemBuilder: (context, index) {
+                final username = profiles[index];
+                return ProfileNameTile(
+                  profileName: username,
+                  onSelect: () => Navigator.of(context).pop(username),
+                  onDelete: () async {
+                    final feedback = await ref
+                        .read(savedProfilesProvider.notifier)
+                        .removeProfile(username);
+
+                    if (!context.mounted) {
+                      return;
+                    }
+
+                    SnackbarHelper.show(
+                      context,
+                      feedback.message,
+                      backgroundColor: AppColors.textPrimary,
+                      textColor: const Color(0xff2e3135),
+                    );
+                  },
+                );
+              },
             ),
     );
   }

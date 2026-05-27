@@ -1,205 +1,213 @@
 import 'dart:convert';
+
+import 'package:anastagram/data/story_models.dart';
+import 'package:anastagram/features/profile/domain/profile_overview.dart';
 import 'package:anastagram/utils/app_logger.dart';
 import 'package:http/http.dart' as http;
 
 class InstagramApi {
-  String? _picURL;
-  int? _followers;
-  int? _following;
-  int? _itemsCount;
-  bool? _isPrivate;
-  final List<String> _highlightsTitel = [];
-  final List<String> _highlightsAvatarUrl = [];
-  final List<String> _highlightsId = [];
-  final List<Map<String, String>> _storieItems = [];
+  InstagramApi({http.Client? client}) : _client = client ?? http.Client();
 
-  Future<void> getApi(String userName) async {
-    final infoUrl = Uri.parse(
-      'https://mediafy-api.p.rapidapi.com/v1/info?username_or_id_or_url=$userName',
-    );
-    final storyUrl = Uri.parse(
-      'https://mediafy-api.p.rapidapi.com/v1/stories?username_or_id_or_url=$userName',
-    );
+  static const _apiHost = 'mediafy-api.p.rapidapi.com';
+  static const _defaultApiKey =
+      'bd70071364msh50b9d05e841d400p14042cjsn761745e97e06';
+  static const _defaultHighlightApiKey =
+      'c05c767a00msh453fb621e171c94p1e536ajsn972c2f9806b5';
 
-    final highlightsUrl = Uri.parse(
-      'https://mediafy-api.p.rapidapi.com/v1/highlights?username_or_id_or_url=$userName',
-    );
+  final http.Client _client;
 
-    final headers = {
-      'x-rapidapi-key': 'bd70071364msh50b9d05e841d400p14042cjsn761745e97e06',
-      'x-rapidapi-host': 'mediafy-api.p.rapidapi.com',
-    };
+  String get _apiKey => const String.fromEnvironment(
+    'RAPIDAPI_KEY',
+    defaultValue: _defaultApiKey,
+  );
+
+  String get _highlightApiKey => const String.fromEnvironment(
+    'RAPIDAPI_HIGHLIGHT_KEY',
+    defaultValue: _defaultHighlightApiKey,
+  );
+
+  Future<ProfileOverview> fetchProfile(String username) async {
+    final normalized = username.trim();
+    if (normalized.isEmpty) {
+      throw Exception('Profilname darf nicht leer sein.');
+    }
 
     try {
-      final infoResponse = await http.get(infoUrl, headers: headers);
-      final storyResponse = await http.get(storyUrl, headers: headers);
-      final highlightsResponse = await http.get(
-        highlightsUrl,
-        headers: headers,
+      final responses = await Future.wait([
+        _get(
+          'https://$_apiHost/v1/info?username_or_id_or_url=$normalized',
+          apiKey: _apiKey,
+        ),
+        _get(
+          'https://$_apiHost/v1/stories?username_or_id_or_url=$normalized',
+          apiKey: _apiKey,
+        ),
+        _get(
+          'https://$_apiHost/v1/highlights?username_or_id_or_url=$normalized',
+          apiKey: _apiKey,
+        ),
+      ]);
+
+      final infoJson = _decodeResponse(responses[0]);
+      final storiesJson = _decodeResponse(responses[1]);
+      final highlightsJson = _decodeResponse(responses[2]);
+
+      final info = infoJson['data'] as Map<String, dynamic>?;
+      if (info == null || info.isEmpty) {
+        throw Exception('Profil "$normalized" wurde nicht gefunden.');
+      }
+
+      return ProfileOverview(
+        username: normalized,
+        profileImageUrl:
+            (info['hd_profile_pic_url_info']?['url'] ?? info['profile_pic_url'])
+                ?.toString(),
+        followers: _toInt(info['follower_count']),
+        following: _toInt(info['following_count']),
+        isPrivate: info['is_private'] == true,
+        stories: _parseMediaItems(storiesJson['data']?['items']),
+        highlights: _parseHighlights(highlightsJson['data']?['items']),
       );
-
-      if (infoResponse.statusCode == 200) {
-        final Map<String, dynamic> jsonResponseInfo = json.decode(
-          infoResponse.body,
-        );
-        _parseInfoData(jsonResponseInfo);
+    } catch (error, stackTrace) {
+      AppLogger.e('Fehler beim Abrufen des Profils', error, stackTrace);
+      if (error is Exception) {
+        rethrow;
       }
-
-      if (storyResponse.statusCode == 200) {
-        final Map<String, dynamic> jsonResponseStory = json.decode(
-          storyResponse.body,
-        );
-        _parseStoryData(jsonResponseStory);
-      }
-
-      if (highlightsResponse.statusCode == 200) {
-        final Map<String, dynamic> jsonResponseHighlights = json.decode(
-          highlightsResponse.body,
-        );
-        _parseHighlightsId(jsonResponseHighlights);
-        _parseHighlightsTitel(jsonResponseHighlights);
-        _parseHighlightsAvatarUrl(jsonResponseHighlights);
-      }
-    } catch (e) {
-      AppLogger.e("Error fetching data: ", e);
+      throw Exception('Profil konnte nicht geladen werden.');
     }
   }
 
-  void _parseInfoData(Map<String, dynamic> data) {
-    _picURL = "";
-    _followers = 0;
-    _isPrivate = false;
-    _following = 0;
-    final info = data['data'];
-    if (info != null) {
-      _picURL = info['hd_profile_pic_url_info']?['url'];
-      _followers = info['follower_count'];
-      _isPrivate = info['is_private'];
-      _following = info['following_count'];
+  Future<List<MediaItem>> fetchHighlightItems(String highlightId) async {
+    try {
+      final response = await _get(
+        'https://$_apiHost/v1/highlight_info?highlight_id=$highlightId',
+        apiKey: _highlightApiKey,
+      );
+      final data = _decodeResponse(response);
+      return _parseMediaItems(data['data']?['items']);
+    } catch (error, stackTrace) {
+      AppLogger.e('Fehler beim Abrufen eines Highlights', error, stackTrace);
+      throw Exception('Highlight konnte nicht geladen werden.');
     }
   }
 
-  void _parseStoryData(Map<String, dynamic> data) {
-    _storieItems.clear();
-    _itemsCount = 0;
-    final items = data['data']?['items'];
-    if (items != null) {
-      for (var item in items) {
-        final String? time = item['taken_at_date'];
-        final bool isVideo = item['is_video'] ?? false;
-
-        if (isVideo) {
-          _addStoriesItem(item['video_url'], 'video', time);
-        } else {
-          _addStoriesItem(item['thumbnail_url'], 'image', time);
-        }
-      }
-      _itemsCount = items.length;
-    }
-  }
-
-  void _parseHighlightsId(Map<String, dynamic> data) {
-    _highlightsId.clear();
-    final items = data['data']?['items'];
-    if (items != null && items is List) {
-      for (var highlight in items) {
-        final id = highlight['id'];
-        if (id != null) {
-          final cleanId = id.toString().replaceFirst('highlight:', '');
-          _highlightsId.add(cleanId);
-        }
-      }
-    }
-  }
-
-  void _parseHighlightsTitel(Map<String, dynamic> data) {
-    _highlightsTitel.clear();
-    final items = data['data']?['items'];
-    if (items != null && items is List) {
-      for (var highlight in items) {
-        final title = highlight['title'];
-        _highlightsTitel.add(title);
-      }
-    }
-  }
-
-  void _parseHighlightsAvatarUrl(Map<String, dynamic> data) {
-    _highlightsAvatarUrl.clear();
-    final items = data['data']?['items'];
-    if (items == null) return;
-
-    for (var highlight in items) {
-      final avatarUrl =
-          highlight['cover_media']?['cropped_image_version']?['url'];
-
-      if (avatarUrl != null && avatarUrl is String && avatarUrl.isNotEmpty) {
-        _highlightsAvatarUrl.add(avatarUrl);
-      }
-    }
-  }
-
-  Future<List<Map<String, String>>> fetchHighlightItems(
-    String highlightId,
-  ) async {
-    List<Map<String, String>> highlightItems = [];
-    final headers = {
-      'x-rapidapi-key': 'c05c767a00msh453fb621e171c94p1e536ajsn972c2f9806b5',
-      'x-rapidapi-host': 'mediafy-api.p.rapidapi.com',
-    };
-    final url = Uri.parse(
-      "https://mediafy-api.p.rapidapi.com/v1/highlight_info?highlight_id=$highlightId",
+  Future<http.Response> _get(String url, {required String apiKey}) async {
+    final response = await _client.get(
+      Uri.parse(url),
+      headers: {
+        'x-rapidapi-key': apiKey,
+        'x-rapidapi-host': _apiHost,
+      },
     );
 
-    final response = await http.get(url, headers: headers);
+    if (response.statusCode >= 400) {
+      throw Exception('API-Fehler (${response.statusCode}).');
+    }
 
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = json.decode(response.body);
+    return response;
+  }
 
-      final items = data['data']?['items'];
+  Map<String, dynamic> _decodeResponse(http.Response response) {
+    final decoded = json.decode(response.body);
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('Ungültige API-Antwort.');
+    }
+    return decoded;
+  }
 
-      if (items != null && items.isNotEmpty) {
-        for (var item in items) {
-          final String? time = item['taken_at_date'];
-          final bool isVideo = item['is_video'] ?? false;
+  List<MediaItem> _parseMediaItems(dynamic rawItems) {
+    if (rawItems is! List) {
+      return const [];
+    }
 
-          final String? mediaUrl = isVideo
-              ? item['video_url']
-              : item['thumbnail_url'];
-          highlightItems.add({
-            'type': isVideo ? 'video' : 'image',
-            'url': ?mediaUrl,
-            if (time != null) 'time': time,
-          });
-        }
+    final items = <MediaItem>[];
+    final seenUrls = <String>{};
+
+    for (final rawItem in rawItems) {
+      if (rawItem is! Map<String, dynamic>) {
+        continue;
       }
-    } else {
-      AppLogger.e(
-        "Fehler beim Abrufen von Highlight $highlightId: ${response.statusCode}",
+
+      final isVideo = rawItem['is_video'] == true;
+      final mediaUrl =
+          (isVideo ? rawItem['video_url'] : rawItem['thumbnail_url'])
+              ?.toString();
+
+      if (mediaUrl == null || mediaUrl.isEmpty || seenUrls.contains(mediaUrl)) {
+        continue;
+      }
+
+      seenUrls.add(mediaUrl);
+      items.add(
+        MediaItem(
+          type: isVideo ? MediaType.video : MediaType.image,
+          url: mediaUrl,
+          takenAt: _parseDate(rawItem['taken_at_date'] ?? rawItem['taken_at']),
+        ),
       );
     }
-    return highlightItems;
+
+    return items;
   }
 
-  void _addStoriesItem(String? url, String type, String? time) {
-    if (url != null && url.isNotEmpty) {
-      final mediaItem = {
-        'type': type,
-        'url': url,
-        if (time != null) 'time': time,
-      };
-      if (!_storieItems.any((item) => item['url'] == url)) {
-        _storieItems.add(mediaItem);
-      }
+  List<HighlightStory> _parseHighlights(dynamic rawItems) {
+    if (rawItems is! List) {
+      return const [];
     }
+
+    return rawItems
+        .whereType<Map<String, dynamic>>()
+        .map((item) {
+          final id = item['id']?.toString().replaceFirst('highlight:', '') ?? '';
+          final avatarUrl =
+              item['cover_media']?['cropped_image_version']?['url']?.toString() ??
+              '';
+
+          if (id.isEmpty || avatarUrl.isEmpty) {
+            return null;
+          }
+
+          return HighlightStory(
+            title: item['title']?.toString().trim().isNotEmpty == true
+                ? item['title'].toString().trim()
+                : 'Highlight',
+            avatarUrl: avatarUrl,
+            id: id,
+          );
+        })
+        .whereType<HighlightStory>()
+        .toList(growable: false);
   }
 
-  String? get picURL => _picURL;
-  int? get following => _following;
-  int? get followers => _followers;
-  int? get itemsCount => _itemsCount;
-  bool? get isPrivate => _isPrivate;
-  List<Map<String, String>> get storieItems => _storieItems;
-  List<String> get highlightsTitel => _highlightsTitel;
-  List<String> get highlightsAvatarUrl => _highlightsAvatarUrl;
-  List<String> get highlightsId => _highlightsId;
+  DateTime? _parseDate(dynamic value) {
+    if (value is String) {
+      return DateTime.tryParse(value)?.toLocal();
+    }
+
+    if (value is int) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        value * 1000,
+        isUtc: true,
+      ).toLocal();
+    }
+
+    if (value is num) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        value.toInt() * 1000,
+        isUtc: true,
+      ).toLocal();
+    }
+
+    return null;
+  }
+
+  int _toInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    if (value is num) {
+      return value.toInt();
+    }
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
 }

@@ -2,58 +2,55 @@ import 'package:anastagram/utils/snackbar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ProfileNameTile extends StatefulWidget {
-  final String? profileName;
-  final void Function()? deleteProfile;
+class ProfileNameTile extends StatelessWidget {
+  const ProfileNameTile({
+    super.key,
+    required this.profileName,
+    required this.onSelect,
+    required this.onDelete,
+  });
 
-  const ProfileNameTile({super.key, this.profileName, this.deleteProfile});
+  final String profileName;
+  final VoidCallback onSelect;
+  final VoidCallback onDelete;
 
-  @override
-  State<ProfileNameTile> createState() => _ProfileNameTileState();
-}
-
-class _ProfileNameTileState extends State<ProfileNameTile> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              final data = ClipboardData(text: widget.profileName ?? '');
-              Clipboard.setData(data);
-              SnackbarHelper.show(context, 'Kopiert');
-            },
-            onLongPress: () {
-              setState(() {
-                widget.deleteProfile!();
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(15)),
-                color: Color(0xFFa0cafd),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(width: 15),
-                  (widget.profileName == null)
-                      ? const Text("")
-                      : Text(
-                          "${widget.profileName}",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            color: Color(0xff194975),
-                          ),
-                        ),
-                ],
-              ),
-            ),
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: const Color(0xFFa0cafd),
+      child: ListTile(
+        onTap: onSelect,
+        title: Text(
+          profileName,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xff194975),
           ),
-        ],
+        ),
+        subtitle: const Text(
+          'Tippen zum Laden · Kopieren oder Löschen über die Icons',
+          style: TextStyle(color: Color(0xff194975)),
+        ),
+        trailing: Wrap(
+          spacing: 4,
+          children: [
+            IconButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: profileName));
+                SnackbarHelper.show(context, 'Kopiert');
+              },
+              icon: const Icon(Icons.copy, color: Color(0xff194975)),
+              tooltip: 'Benutzernamen kopieren',
+            ),
+            IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline, color: Color(0xff194975)),
+              tooltip: 'Profil entfernen',
+            ),
+          ],
+        ),
       ),
     );
   }

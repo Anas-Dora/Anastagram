@@ -1,3 +1,4 @@
+import 'package:anastagram/shared/widgets/fullscreen_media_page.dart';
 import 'package:flutter/material.dart';
 
 class ProfileImageViewer extends StatefulWidget {
@@ -12,23 +13,6 @@ class ProfileImageViewer extends StatefulWidget {
 class _ProfileImageViewerState extends State<ProfileImageViewer> {
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Image.network(widget.picture, fit: BoxFit.cover),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return FullscreenMediaPage.image(url: widget.picture);
   }
 }

@@ -2,28 +2,29 @@ import 'package:flutter/material.dart';
 
 class ProfileActions extends StatelessWidget {
   final bool isSaved;
-  final String saveText;
-  final VoidCallback onSave;
-  final VoidCallback onUnsave;
+  final VoidCallback onToggleSaved;
 
   const ProfileActions({
     super.key,
     required this.isSaved,
-    required this.saveText,
-    required this.onSave,
-    required this.onUnsave,
+    required this.onToggleSaved,
   });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      onPressed: isSaved ? onUnsave : onSave,
+      onPressed: onToggleSaved,
       icon: Icon(
         isSaved ? Icons.bookmark : Icons.bookmark_border,
-        color: Color(0xff003258),
+        color: const Color(0xff003258),
       ),
-      label: Text(saveText, style: TextStyle(color: Color(0xff003258))),
-      style: ElevatedButton.styleFrom(backgroundColor: Color(0xffa0cafd)),
+      label: Text(
+        isSaved ? 'Gespeichert' : 'Speichern',
+        style: const TextStyle(color: Color(0xff003258)),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xffa0cafd),
+      ),
     );
   }
 }

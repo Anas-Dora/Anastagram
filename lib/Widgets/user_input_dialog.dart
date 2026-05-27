@@ -11,6 +11,12 @@ class _UserInputDialogState extends State<UserInputDialog> {
   final _usernameController = TextEditingController();
 
   @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text(
@@ -22,6 +28,11 @@ class _UserInputDialogState extends State<UserInputDialog> {
         style: TextStyle(color: Color(0xffe1e2e8)),
         cursorColor: Color(0xffa0cafd),
         controller: _usernameController,
+        onChanged: (_) => setState(() {}),
+        onSubmitted: (_) {
+          final username = _usernameController.text.trim();
+          Navigator.pop(context, username.isEmpty ? null : username);
+        },
         autofocus: true,
         decoration: InputDecoration(
           labelText: "Nutzername",
@@ -33,6 +44,7 @@ class _UserInputDialogState extends State<UserInputDialog> {
                   color: const Color(0xffa0cafd),
                   onPressed: () {
                     _usernameController.clear();
+                    setState(() {});
                   },
                 ),
           focusedBorder: const OutlineInputBorder(
