@@ -133,8 +133,6 @@ class HomePage extends ConsumerWidget {
             const EmptyState(
               icon: Icons.search,
               title: 'Suche ein Instagram-Profil',
-              subtitle:
-                  'Tippe unten rechts auf die Suche und gib einen Benutzernamen ein.',
             )
           else ...[
             ProfileStats(
@@ -149,29 +147,26 @@ class HomePage extends ConsumerWidget {
                 onToggleSaved: () => _toggleSaved(context, ref),
               ),
             ),
-            const SizedBox(height: 20),
-            if (!profile.isPrivate && profile.highlights.isNotEmpty)
+            const SizedBox(height: 16),
+            if (profile.highlights.isNotEmpty) ...[
+              const SizedBox(height: 4),
               StoryTrayList(
                 stories: profile.highlights,
                 onOpenStory: (story) => _openHighlight(context, ref, story),
               ),
-            const Divider(color: AppColors.divider, thickness: 2),
+            ],
+            const SizedBox(height: 16),
+            const Divider(color: AppColors.divider, thickness: 1),
             const SizedBox(height: 20),
             if (profile.isPrivate)
-              const Text(
-                'Dieses Profil ist privat.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.error,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              const EmptyState(
+                icon: Icons.lock_outline,
+                title: 'Dieses Profil ist privat',
               )
             else if (profile.stories.isEmpty)
               const EmptyState(
                 icon: Icons.photo_library_outlined,
                 title: 'Keine Story-Medien gefunden',
-                subtitle: 'Für dieses Profil wurden aktuell keine Stories geladen.',
               )
             else
               MediaList(mediaItems: profile.stories),

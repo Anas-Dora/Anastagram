@@ -15,7 +15,7 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = username.trim().isEmpty ? 'Noch kein Profil geladen' : username;
+    final displayName = username.trim().isEmpty ? '' : username;
 
     return Column(
       children: [

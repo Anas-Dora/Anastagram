@@ -1,3 +1,4 @@
+import 'package:anastagram/core/exceptions/app_exceptions.dart';
 import 'package:anastagram/data/profile.dart';
 import 'package:anastagram/data/userdata.dart';
 import 'package:hive/hive.dart';
@@ -9,17 +10,26 @@ class SavedProfilesRepository {
 
   final Box<UserData> _box;
 
-  UserData _readUserData() =>
-      _box.get(_mainUserKey) ?? UserData(profiles: <Profile>[]);
+  UserData _readUserData() {
+    try {
+      return _box.get(_mainUserKey) ?? UserData(profiles: <Profile>[]);
+    } catch (e) {
+      throw StorageException('Konnte Profile nicht laden: $e');
+    }
+  }
 
   List<String> getSavedUsernames() {
-    final unique = <String>{
-      for (final profile in _readUserData().profiles)
-        if ((profile.name ?? '').trim().isNotEmpty) (profile.name ?? '').trim(),
-    };
+    try {
+      final unique = <String>{
+        for (final profile in _readUserData().profiles)
+          if ((profile.name ?? '').trim().isNotEmpty) (profile.name ?? '').trim(),
+      };
 
-    final usernames = unique.toList()..sort();
-    return usernames;
+      final usernames = unique.toList()..sort();
+      return usernames;
+    } catch (e) {
+      throw StorageException('Konnte gespeicherte Benutzernamen nicht abrufen: $e');
+    }
   }
 
   bool exists(String username) {
@@ -33,26 +43,33 @@ class SavedProfilesRepository {
   Future<void> saveProfile(String username) async {
     final normalized = username.trim();
     if (normalized.isEmpty) {
-      throw StateError('Profilname darf nicht leer sein.');
+      throw ValidationException('Benutzername darf nicht leer sein.');
     }
     if (exists(normalized)) {
-      throw StateError('Profil existiert bereits.');
+      throw ValidationException('Profil existiert bereits.');
     }
 
-    final userData = _readUserData();
-    userData.profiles.add(Profile(name: normalized));
-    await _box.put(_mainUserKey, userData);
+    try {
+      final userData = _readUserData();
+      userData.profiles.add(Profile(name: normalized));
+      await _box.put(_mainUserKey, userData);
+    } catch (e) {
+      throw StorageException('Konnte Profil nicht speichern: $e');
+    }
   }
 
   Future<void> removeProfile(String username) async {
     final normalized = username.trim();
     if (normalized.isEmpty) {
-      throw StateError('Profilname darf nicht leer sein.');
+      throw ValidationException('Benutzername darf nicht leer sein.');
     }
 
-    final userData = _readUserData();
-    userData.profiles.removeWhere((profile) => profile.name == normalized);
-    await _box.put(_mainUserKey, userData);
+    try {
+      final userData = _readUserData();
+      userData.profiles.removeWhere((profile) => profile.name == normalized);
+      await _box.put(_mainUserKey, userData);
+    } catch (e) {
+      throw StorageException('Konnte Profil nicht entfernen: $e');
+    }
   }
 }
-

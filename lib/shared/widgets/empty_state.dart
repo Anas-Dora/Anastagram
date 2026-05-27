@@ -6,12 +6,10 @@ class EmptyState extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
-    this.subtitle,
   });
 
   final IconData icon;
   final String title;
-  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -32,17 +30,6 @@ class EmptyState extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                subtitle!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                ),
-              ),
-            ],
           ],
         ),
       ),

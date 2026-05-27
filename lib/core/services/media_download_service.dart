@@ -29,7 +29,7 @@ class MediaDownloadService {
       final bytes = Uint8List.fromList(response.data ?? const []);
       if (bytes.isEmpty) {
         return const ActionFeedback(
-          'Bilddaten konnten nicht geladen werden.',
+          'Bilddaten waren leer.',
           isError: true,
         );
       }
@@ -47,8 +47,10 @@ class MediaDownloadService {
         error,
         stackTrace,
       );
-      return const ActionFeedback(
-        'Bild konnte nicht gespeichert werden.',
+
+      final message = _getErrorMessage(error);
+      return ActionFeedback(
+        'Bild konnte nicht gespeichert werden: $message',
         isError: true,
       );
     }
@@ -64,4 +66,18 @@ class MediaDownloadService {
     return storageStatus.isGranted;
   }
 }
+
+  String _getErrorMessage(dynamic error) {
+    if (error is DioException) {
+      if (error.type == DioExceptionType.connectionTimeout) {
+        return 'Verbindungs-Timeout.';
+      } else if (error.type == DioExceptionType.receiveTimeout) {
+        return 'Download-Timeout.';
+      } else if (error.type == DioExceptionType.unknown) {
+        return 'Netzwerkfehler.';
+      }
+      return 'HTTP-Fehler ${error.response?.statusCode}.';
+    }
+    return error.toString();
+  }
 

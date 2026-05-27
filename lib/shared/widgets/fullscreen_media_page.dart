@@ -26,15 +26,9 @@ class FullscreenMediaPage extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Center(child: body),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                onPressed: () => Navigator.of(context).maybePop(),
-                icon: const Icon(Icons.close, color: Colors.white),
-              ),
-            ),
+            GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Center(child: body)),
           ],
         ),
       ),

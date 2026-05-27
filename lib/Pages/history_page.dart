@@ -24,8 +24,6 @@ class HistoryPage extends ConsumerWidget {
           ? const EmptyState(
               icon: Icons.bookmarks_outlined,
               title: 'Keine gespeicherten Profile',
-              subtitle:
-                  'Speichere ein Profil auf der Startseite, um es hier wiederzufinden.',
             )
           : ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 12),

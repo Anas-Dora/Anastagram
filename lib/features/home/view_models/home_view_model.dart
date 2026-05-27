@@ -1,4 +1,5 @@
 import 'package:anastagram/core/di/providers.dart';
+import 'package:anastagram/core/exceptions/app_exceptions.dart';
 import 'package:anastagram/core/models/action_feedback.dart';
 import 'package:anastagram/data/story_models.dart';
 import 'package:anastagram/features/history/view_models/saved_profiles_view_model.dart';
@@ -40,6 +41,14 @@ class HomeViewModel extends Notifier<HomeUiState> {
         isSaved: isSaved,
       );
       return null;
+    } on AppException catch (error) {
+      state = state.copyWith(
+        username: username,
+        isLoading: false,
+        isSaved: false,
+        clearProfile: true,
+      );
+      return ActionFeedback(error.message, isError: true);
     } catch (error) {
       state = state.copyWith(
         username: username,
@@ -47,7 +56,7 @@ class HomeViewModel extends Notifier<HomeUiState> {
         isSaved: false,
         clearProfile: true,
       );
-      return ActionFeedback(error.toString().replaceFirst('Exception: ', ''), isError: true);
+      return ActionFeedback('Unerwarteter Fehler: $error', isError: true);
     }
   }
 
@@ -74,8 +83,10 @@ class HomeViewModel extends Notifier<HomeUiState> {
       state = state.copyWith(isSaved: true);
       ref.read(savedProfilesProvider.notifier).refresh();
       return ActionFeedback('Profil "$username" gespeichert.');
-    } on StateError catch (error) {
+    } on AppException catch (error) {
       return ActionFeedback(error.message, isError: true);
+    } catch (error) {
+      return ActionFeedback('Fehler beim Speichern: $error', isError: true);
     }
   }
 
@@ -88,7 +99,11 @@ class HomeViewModel extends Notifier<HomeUiState> {
       );
     }
 
-    return ref.read(mediaDownloadServiceProvider).saveImageFromUrl(imageUrl);
+    try {
+      return await ref.read(mediaDownloadServiceProvider).saveImageFromUrl(imageUrl);
+    } on AppException catch (error) {
+      return ActionFeedback(error.message, isError: true);
+    }
   }
 
   Future<List<MediaItem>> loadHighlightItems(String highlightId) {
@@ -99,4 +114,3 @@ class HomeViewModel extends Notifier<HomeUiState> {
     state = HomeUiState.initial();
   }
 }
-

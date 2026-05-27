@@ -29,10 +29,6 @@ class ProfileNameTile extends StatelessWidget {
             color: Color(0xff194975),
           ),
         ),
-        subtitle: const Text(
-          'Tippen zum Laden · Kopieren oder Löschen über die Icons',
-          style: TextStyle(color: Color(0xff194975)),
-        ),
         trailing: Wrap(
           spacing: 4,
           children: [
