@@ -7,7 +7,15 @@ final savedProfilesProvider =
       SavedProfilesViewModel.new,
     );
 
-final savedProfilesPrivacyProvider = FutureProvider<Map<String, bool?>>((ref) async {
+class SavedProfileStatus {
+  const SavedProfileStatus({required this.isPrivate, required this.storiesCount});
+
+  final bool? isPrivate;
+  final int? storiesCount;
+}
+
+final savedProfilesStatusProvider =
+    FutureProvider<Map<String, SavedProfileStatus>>((ref) async {
   final usernames = ref.watch(savedProfilesProvider);
   final instagramApi = ref.watch(instagramApiProvider);
 
@@ -15,14 +23,23 @@ final savedProfilesPrivacyProvider = FutureProvider<Map<String, bool?>>((ref) as
     usernames.map((username) async {
       try {
         final profileOverview = await instagramApi.fetchProfile(username);
-        return MapEntry<String, bool?>(username, profileOverview.isPrivate);
+        return MapEntry<String, SavedProfileStatus>(
+          username,
+          SavedProfileStatus(
+            isPrivate: profileOverview.isPrivate,
+            storiesCount: profileOverview.storiesCount,
+          ),
+        );
       } catch (_) {
-        return MapEntry<String, bool?>(username, null);
+        return MapEntry<String, SavedProfileStatus>(
+          username,
+          const SavedProfileStatus(isPrivate: null, storiesCount: null),
+        );
       }
     }),
   );
 
-  return Map<String, bool?>.fromEntries(entries);
+  return Map<String, SavedProfileStatus>.fromEntries(entries);
 });
 
 class SavedProfilesViewModel extends Notifier<List<String>> {

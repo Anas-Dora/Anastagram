@@ -7,14 +7,14 @@ class ProfileNameTile extends StatelessWidget {
     super.key,
     required this.profileName,
     required this.onSelect,
-    required this.onDelete,
     this.isPrivate,
+    this.storiesCount,
   });
 
   final String profileName;
   final VoidCallback onSelect;
-  final VoidCallback onDelete;
   final bool? isPrivate;
+  final int? storiesCount;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +23,10 @@ class ProfileNameTile extends StatelessWidget {
       color: const Color(0xFFa0cafd),
       child: ListTile(
         onTap: onSelect,
+        onLongPress: () {
+          Clipboard.setData(ClipboardData(text: profileName));
+          SnackbarHelper.show(context, 'Kopiert');
+        },
         title: Text(
           profileName,
           style: const TextStyle(
@@ -35,6 +39,16 @@ class ProfileNameTile extends StatelessWidget {
           spacing: 4,
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (isPrivate == false && (storiesCount ?? 0) > 0)
+              Text(
+                '${storiesCount ?? 0}',
+                style: const TextStyle(
+                  color: Color(0xff194975),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 26,
+                ),
+              ),
+            const SizedBox(width: 12),
             // Lock icon showing privacy status
             if (isPrivate != null)
               Tooltip(
@@ -47,20 +61,6 @@ class ProfileNameTile extends StatelessWidget {
                   ),
                 ),
               ),
-            SizedBox(width: 8),
-            IconButton(
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: profileName));
-                SnackbarHelper.show(context, 'Kopiert');
-              },
-              icon: const Icon(Icons.copy, color: Color(0xff194975)),
-              tooltip: 'Benutzernamen kopieren',
-            ),
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline, color: Color(0xff194975)),
-              tooltip: 'Profil entfernen',
-            ),
           ],
         ),
       ),
