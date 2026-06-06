@@ -12,6 +12,7 @@ class HistoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profiles = ref.watch(savedProfilesProvider);
+    final privacyStatus = ref.watch(savedProfilesPrivacyProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,32 +26,64 @@ class HistoryPage extends ConsumerWidget {
               icon: Icons.bookmarks_outlined,
               title: 'Keine gespeicherten Profile',
             )
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              itemCount: profiles.length,
-              itemBuilder: (context, index) {
-                final username = profiles[index];
-                return ProfileNameTile(
-                  profileName: username,
-                  onSelect: () => Navigator.of(context).pop(username),
-                  onDelete: () async {
-                    final feedback = await ref
-                        .read(savedProfilesProvider.notifier)
-                        .removeProfile(username);
+          : privacyStatus.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, __) => ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final username = profiles[index];
+                  return ProfileNameTile(
+                    profileName: username,
+                    isPrivate: null,
+                    onSelect: () => Navigator.of(context).pop(username),
+                    onDelete: () async {
+                      final feedback = await ref
+                          .read(savedProfilesProvider.notifier)
+                          .removeProfile(username);
 
-                    if (!context.mounted) {
-                      return;
-                    }
+                      if (!context.mounted) {
+                        return;
+                      }
 
-                    SnackbarHelper.show(
-                      context,
-                      feedback.message,
-                      backgroundColor: AppColors.textPrimary,
-                      textColor: const Color(0xff2e3135),
-                    );
-                  },
-                );
-              },
+                      SnackbarHelper.show(
+                        context,
+                        feedback.message,
+                        backgroundColor: AppColors.textPrimary,
+                        textColor: const Color(0xff2e3135),
+                      );
+                    },
+                  );
+                },
+              ),
+              data: (privacyMap) => ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final username = profiles[index];
+                  return ProfileNameTile(
+                    profileName: username,
+                    isPrivate: privacyMap[username],
+                    onSelect: () => Navigator.of(context).pop(username),
+                    onDelete: () async {
+                      final feedback = await ref
+                          .read(savedProfilesProvider.notifier)
+                          .removeProfile(username);
+
+                      if (!context.mounted) {
+                        return;
+                      }
+
+                      SnackbarHelper.show(
+                        context,
+                        feedback.message,
+                        backgroundColor: AppColors.textPrimary,
+                        textColor: const Color(0xff2e3135),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
     );
   }

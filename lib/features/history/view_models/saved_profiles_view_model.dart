@@ -7,6 +7,24 @@ final savedProfilesProvider =
       SavedProfilesViewModel.new,
     );
 
+final savedProfilesPrivacyProvider = FutureProvider<Map<String, bool?>>((ref) async {
+  final usernames = ref.watch(savedProfilesProvider);
+  final instagramApi = ref.watch(instagramApiProvider);
+
+  final entries = await Future.wait(
+    usernames.map((username) async {
+      try {
+        final profileOverview = await instagramApi.fetchProfile(username);
+        return MapEntry<String, bool?>(username, profileOverview.isPrivate);
+      } catch (_) {
+        return MapEntry<String, bool?>(username, null);
+      }
+    }),
+  );
+
+  return Map<String, bool?>.fromEntries(entries);
+});
+
 class SavedProfilesViewModel extends Notifier<List<String>> {
   @override
   List<String> build() {
