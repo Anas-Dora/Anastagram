@@ -26,6 +26,7 @@ class InstagramApi {
       final infoResponse = await _get(
         'https://${Config.apiHost}/v1/info?username_or_id_or_url=$normalized',
         apiKey: _apiKey,
+        host: Config.apiHost,
       );
 
       final infoJson = _decodeResponse(infoResponse);
@@ -46,6 +47,7 @@ class InstagramApi {
           final storiesResponse = await _get(
             'https://${Config.apiHost}/v1/stories?username_or_id_or_url=$normalized',
             apiKey: _apiKey,
+            host: Config.apiHost,
           );
           final storiesJson = _decodeResponse(storiesResponse);
           stories = _parseMediaItems(storiesJson['data']?['items']);
@@ -58,6 +60,7 @@ class InstagramApi {
           final highlightsResponse = await _get(
             'https://${Config.apiHost}/v1/highlights?username_or_id_or_url=$normalized',
             apiKey: _apiKey,
+            host: Config.apiHost,
           );
           final highlightsJson = _decodeResponse(highlightsResponse);
           highlights = _parseHighlights(highlightsJson['data']?['items']);
@@ -90,8 +93,9 @@ class InstagramApi {
   Future<List<MediaItem>> fetchHighlightItems(String highlightId) async {
     try {
       final response = await _get(
-        'https://${Config.apiHost}/v1/highlight_info?highlight_id=$highlightId',
+        'https://${Config.instagramHighlightApiHost}/v1/highlight_info?highlight_id=$highlightId',
         apiKey: _highlightApiKey,
+        host: Config.instagramHighlightApiHost,
       );
       final data = _decodeResponse(response);
       return _parseMediaItems(data['data']?['items']);
@@ -101,17 +105,35 @@ class InstagramApi {
     }
   }
 
-  Future<http.Response> _get(String url, {required String apiKey}) async {
+  Future<http.Response> _get(
+    String url, {
+    required String apiKey,
+    required String host,
+  }) async {
     try {
-      final response = await _client
+      var response = await _client
           .get(
             Uri.parse(url),
             headers: {
               'x-rapidapi-key': apiKey,
-              'x-rapidapi-host': Config.apiHost,
+              'x-rapidapi-host': host,
             },
           )
           .timeout(Config.apiTimeout);
+
+      // Bei Rate-Limit mit dem Primär-Key einmalig auf den Fallback-Key wechseln.
+      if (response.statusCode == 429 && apiKey == _apiKey) {
+        AppLogger.w('429 mit Primär-Key auf $host, versuche Fallback-Key.');
+        response = await _client
+            .get(
+              Uri.parse(url),
+              headers: {
+                'x-rapidapi-key': _highlightApiKey,
+                'x-rapidapi-host': host,
+              },
+            )
+            .timeout(Config.apiTimeout);
+      }
 
       if (response.statusCode >= 400) {
         throw NetworkException('API-Fehler ${response.statusCode}.');
