@@ -62,6 +62,7 @@ class HistoryPage extends ConsumerWidget {
                     },
                     child: ProfileNameTile(
                       profileName: username,
+                      profileImageUrl: null,
                       isPrivate: null,
                       onSelect: () => Navigator.of(context).pop(username),
                     ),
@@ -86,6 +87,7 @@ class HistoryPage extends ConsumerWidget {
                     },
                     child: ProfileNameTile(
                       profileName: username,
+                      profileImageUrl: status?.profileImageUrl,
                       isPrivate: status?.isPrivate,
                       storiesCount: status?.storiesCount,
                       onSelect: () => Navigator.of(context).pop(username),

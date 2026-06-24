@@ -8,10 +8,15 @@ final savedProfilesProvider =
     );
 
 class SavedProfileStatus {
-  const SavedProfileStatus({required this.isPrivate, required this.storiesCount});
+  const SavedProfileStatus({
+    required this.isPrivate,
+    required this.storiesCount,
+    required this.profileImageUrl,
+  });
 
   final bool? isPrivate;
   final int? storiesCount;
+  final String? profileImageUrl;
 }
 
 final savedProfilesStatusProvider =
@@ -28,12 +33,17 @@ final savedProfilesStatusProvider =
           SavedProfileStatus(
             isPrivate: profileOverview.isPrivate,
             storiesCount: profileOverview.storiesCount,
+            profileImageUrl: profileOverview.profileImageUrl,
           ),
         );
       } catch (_) {
         return MapEntry<String, SavedProfileStatus>(
           username,
-          const SavedProfileStatus(isPrivate: null, storiesCount: null),
+          const SavedProfileStatus(
+            isPrivate: null,
+            storiesCount: null,
+            profileImageUrl: null,
+          ),
         );
       }
     }),

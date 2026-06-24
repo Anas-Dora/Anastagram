@@ -7,12 +7,14 @@ class ProfileNameTile extends StatelessWidget {
     super.key,
     required this.profileName,
     required this.onSelect,
+    this.profileImageUrl,
     this.isPrivate,
     this.storiesCount,
   });
 
   final String profileName;
   final VoidCallback onSelect;
+  final String? profileImageUrl;
   final bool? isPrivate;
   final int? storiesCount;
 
@@ -27,6 +29,7 @@ class ProfileNameTile extends StatelessWidget {
           Clipboard.setData(ClipboardData(text: profileName));
           SnackbarHelper.show(context, 'Kopiert');
         },
+        leading: _Avatar(profileImageUrl: profileImageUrl),
         title: Text(
           profileName,
           style: const TextStyle(
@@ -63,6 +66,39 @@ class ProfileNameTile extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.profileImageUrl});
+
+  final String? profileImageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = profileImageUrl;
+
+    return Container(
+      width: 45,
+      height: 45,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xff194975), width: 1.2),
+      ),
+      child: ClipOval(
+        child: imageUrl == null || imageUrl.isEmpty
+            ? const Icon(Icons.person, color: Color(0xff194975), size: 24)
+            : Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.person,
+                  color: Color(0xff194975),
+                  size: 24,
+                ),
+              ),
       ),
     );
   }
